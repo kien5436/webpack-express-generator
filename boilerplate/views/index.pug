@@ -6,9 +6,7 @@ html(lang='en')
     meta(http-equiv='X-UA-Compatible', content='ie=edge')
     title Webpack - Express
     link(rel='shortcut icon' type='image/x-icon' href='/assets/images/favicon.ico')
-    //- for chromium api
-    link(rel='preload' href='/assets/fonts/Nunito-400.woff2' as='font' type='font/woff2' crossorigin)
-    link(rel='preload' href='/assets/fonts/Nunito-700.woff2' as='font' type='font/woff2' crossorigin)
+    link(href='https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap' rel='stylesheet')
     each path in css
       link(rel='stylesheet' href=path)
   body

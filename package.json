@@ -1,7 +1,7 @@
 {
   "author": "Phạm Trung Kiên",
   "bin": {
-    "we": "bin/webpack-express-cli.js"
+    "we": "./bin/webpack-express-cli.js"
   },
   "bugs": "https://github.com/shhlkien/webpack-express-generator/issues",
   "description": "Webpack good practice for Express project",

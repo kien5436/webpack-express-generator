@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const { createInterface } = require('readline');
-const { join } = require('path');
+const { join, basename, isAbsolute, resolve, } = require('path');
 const { program } = require('commander');
 const {
   constants: { F_OK },
@@ -37,8 +37,12 @@ program
 
 async function run(projectName) {
 
-  projectName = projectName.endsWith('/') ? projectName.substring(0, projectName.length - 1) : projectName;
-  const DEST_DIR = projectName.startsWith('/') ? projectName : `${process.cwd()}/${projectName}`;
+  projectName = projectName
+    .replace(/[^A-Za-z0-9.-/]+/g, '-')
+    .replace(/^[-_.]+|-+$/g, '')
+    .toLowerCase();
+  const DEST_DIR = isAbsolute(projectName) ? projectName : resolve(process.cwd(), projectName);
+  console.info('webpack-express-cli.js:42: ', DEST_DIR)
 
   try {
     await access(DEST_DIR, F_OK);
@@ -46,7 +50,7 @@ async function run(projectName) {
   catch (err) {
 
     await mkdir(DEST_DIR, { mode: MODE_RWX, recursive: true });
-    console.log(`Destination does not exist, create ${projectName}`);
+    console.log(`Destination does not exist, create '${projectName}'`);
   }
 
   try {
@@ -69,6 +73,7 @@ async function run(projectName) {
 
       await Promise.all([
         generateApp(DEST_DIR),
+        ...generateEnv(DEST_DIR),
         generatePackageJson(DEST_DIR, projectName),
       ]);
 
@@ -102,7 +107,7 @@ async function generateApp(dest) {
 
     const file = fileMap[i];
     const from = BOILERPLATE_DIR + file.name;
-    const to = dest + file.name;
+    const to = dest + (file.name.endsWith('gitignore') ? '/.gitignore' : file.name);
 
     if (file.isDir) {
       mkdirs.push(mkdir(to, { mode: MODE_RWX, recursive: true }));
@@ -130,6 +135,14 @@ async function generateApp(dest) {
   await Promise.all(mkfiles);
 }
 
+function generateEnv(dest) {
+
+  return [
+    writeFile(dest + '/.env', 'PORT=3000', { encoding: 'utf8', mode: MODE_RW }),
+    writeFile(dest + '/.env.example', 'PORT=', { encoding: 'utf8', mode: MODE_RW }),
+  ];
+}
+
 async function generateEslint(dest) {
 
   const eslintConfig = require('../boilerplate/eslint')(program.eslint);
@@ -140,10 +153,9 @@ async function generateEslint(dest) {
   ]);
 }
 
-async function generatePackageJson(dest, projectName) {
+function generatePackageJson(dest, projectName) {
 
-  projectName = projectName.match(/(\w+)\/?$/)[1];
-  const packageContent = require('../boilerplate/package.js')(projectName, !!program.eslint);
+  const packageContent = require('../boilerplate/package.js')(basename(projectName), !!program.eslint);
   let viewEngineVer = '';
 
   switch (program.view) {
@@ -160,7 +172,7 @@ async function generatePackageJson(dest, projectName) {
   }
   packageContent.dependencies[program.view] = viewEngineVer;
 
-  await writeFile(dest + '/package.json', JSON.stringify(packageContent, null, 2), { mode: MODE_RW });
+  return writeFile(dest + '/package.json', JSON.stringify(packageContent, null, 2), { mode: MODE_RW });
 }
 
 function setViewEngine(engine) {
