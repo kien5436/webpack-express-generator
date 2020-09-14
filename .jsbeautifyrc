@@ -1,0 +1,7 @@
+{
+  "brace_style": "end-expand,preserve-inline",
+  "break_chained_methods": true,
+  "css": { "space_around_combinator": true },
+  "e4x": true,
+  "indent_size": 2
+}
