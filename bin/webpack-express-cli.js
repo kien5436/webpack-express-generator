@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const { createInterface } = require('readline');
-const { join, basename, isAbsolute, resolve, } = require('path');
+const { join, basename, isAbsolute, resolve } = require('path');
 const { program } = require('commander');
 const {
   constants: { F_OK },
@@ -42,7 +42,7 @@ async function run(projectName) {
     .replace(/^[-_.]+|-+$/g, '')
     .toLowerCase();
   const DEST_DIR = isAbsolute(projectName) ? projectName : resolve(process.cwd(), projectName);
-  console.info('webpack-express-cli.js:42: ', DEST_DIR)
+  console.info('webpack-express-cli.js:42: ', DEST_DIR);
 
   try {
     await access(DEST_DIR, F_OK);
@@ -225,7 +225,7 @@ async function getViews() {
  */
 function confirm(msg) {
 
-  return new Promise((resolve) => {
+  return new Promise((_resolve) => {
 
     const rl = createInterface({
       input: process.stdin,
@@ -235,7 +235,7 @@ function confirm(msg) {
     rl.question(msg, function(input) {
 
       rl.close();
-      resolve(/^y|yes$/i.test(input));
+      _resolve(/^y|yes$/i.test(input));
     });
   });
 }
