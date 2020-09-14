@@ -25,7 +25,8 @@
   "repository": "https://github.com/shhlkien/webpack-express-generator",
   "version": "1.0.0",
   "scripts": {
-    "lint": "eslint -c .eslintrc.json --ext .js ."
+    "lint": "eslint -c .eslintrc.json --ext .js .",
+    "test": "mocha"
   },
   "devDependencies": {
     "eslint": "^7.9.0",

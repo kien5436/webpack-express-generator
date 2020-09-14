@@ -3,7 +3,19 @@
 const { createInterface } = require('readline');
 const { join } = require('path');
 const { program } = require('commander');
-const { promises: { readFile, mkdir, writeFile, copyFile, rmdir, readdir, opendir }, existsSync } = require('fs');
+const {
+  constants: { F_OK },
+  promises: {
+    access,
+    copyFile,
+    mkdir,
+    opendir,
+    readdir,
+    readFile,
+    rmdir,
+    writeFile,
+  },
+} = require('fs');
 
 const { version: VERSION } = require('../package.json');
 const BOILERPLATE_DIR = join(__dirname, '../boilerplate');
@@ -29,23 +41,29 @@ async function run(projectName) {
   const DEST_DIR = projectName.startsWith('/') ? projectName : `${process.cwd()}/${projectName}`;
 
   try {
+    await access(DEST_DIR, F_OK);
+  }
+  catch (err) {
+
+    await mkdir(DEST_DIR, { mode: MODE_RWX, recursive: true });
+    console.log(`Destination does not exist, create ${projectName}`);
+  }
+
+  try {
     try {
-      if (!existsSync(DEST_DIR)) await mkdir(DEST_DIR, { mode: MODE_RWX, recursive: true });
-      else {
-        const dir = await opendir(DEST_DIR);
-        const { done: isEmpty } = await dir[Symbol.asyncIterator]()
-          .next();
+      const dir = await opendir(DEST_DIR);
+      const { done: isEmpty } = await dir[Symbol.asyncIterator]()
+        .next();
 
-        if (!isEmpty && !program.force) {
+      if (!isEmpty && !program.force) {
 
-          const ok = await confirm('Destination is not empty, overwrite everything inside? [y/n] ');
+        const ok = await confirm('Destination is not empty, overwrite everything inside? [y/n] ');
 
-          if (ok) process.stdin.destroy();
-          else {
-            console.log('aborted');
-            process.exit(1);
-            return;
-          }
+        if (ok) process.stdin.destroy();
+        else {
+          console.log('aborted');
+          process.exit(1);
+          return;
         }
       }
 

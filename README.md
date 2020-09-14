@@ -40,6 +40,7 @@ Options:
   --eslint <rule>  eslint config support:
                    recommended: eslint recommendation,
                    pk: my recommendation for eslint (default: "recommended")
+  -f, --force      force on non-empty directory
   -h, --help       display help for command
 ```
 
