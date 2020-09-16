@@ -10,11 +10,6 @@ module.exports = [
     'name': '/client/src/scripts/index.js',
   },
   {
-    'isDir': false,
-    'level': 4,
-    'name': '/client/src/styles/index.scss',
-  },
-  {
     'isDir': true,
     'level': 3,
     'name': '/client/src/images',
@@ -32,12 +27,7 @@ module.exports = [
   {
     'isDir': false,
     'level': 3,
-    'name': '/client/webpack/config.dev.js',
-  },
-  {
-    'isDir': false,
-    'level': 3,
-    'name': '/client/webpack/config.prod.js',
+    'name': '/client/webpack/shared.js',
   },
   {
     'isDir': true,
@@ -48,11 +38,6 @@ module.exports = [
     'isDir': true,
     'level': 2,
     'name': '/client/webpack',
-  },
-  {
-    'isDir': false,
-    'level': 2,
-    'name': '/config/app.js',
   },
   {
     'isDir': false,

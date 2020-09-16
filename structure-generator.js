@@ -11,12 +11,8 @@ const BOILERPLATE_DIR = join(__dirname, 'boilerplate');
     const dirents = await readDir(BOILERPLATE_DIR, 1);
     const files = [];
 
-    for (;;) {
-      /* eslint-disable-next-line no-await-in-loop */
-      const it = await dirents.next();
-      if (it.done) break;
-      files.push(it.value);
-    }
+
+    for await (const file of dirents) files.push(file);
 
     const sortedFiles = files.sort((f1, f2) => f2.level - f1.level);
     const content = `module.exports = ${JSON.stringify(sortedFiles, null, 2)}`;
@@ -31,8 +27,8 @@ const BOILERPLATE_DIR = join(__dirname, 'boilerplate');
 async function* readDir(dir, level) {
 
   const files = await readdir(dir, { withFileTypes: true });
-  const excludeFiles = ['eslint.js', 'file-map.js', 'package.js'];
-  const excludeExtensions = ['.ejs', '.pug', '.hbs'];
+  const excludeFiles = ['app.js', 'eslint.js', 'file-map.js', 'package.js', 'config.dev.js', 'config.prod.js' ];
+  const excludeExtensions = ['.ejs', '.pug', '.hbs', '.css', '.sass', '.scss', '.less', '.styl' ];
 
   for (const file of files) {
 

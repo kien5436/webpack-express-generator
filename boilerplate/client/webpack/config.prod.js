@@ -1,45 +1,16 @@
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const { resolve } = require('path');
 const ManifestPlugin = require('webpack-manifest-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const TerserJSPlugin = require('terser-webpack-plugin');
 
-const srcPath = resolve('client/src');
+const { entry, output, module: webpackModule } = require('./shared')({ style: '<@ style @>' });
 
 module.exports = {
   mode: 'production',
-  entry: { index: `${srcPath}/scripts/index.js` },
-  output: {
-    filename: 'js/[contenthash:7].js',
-    publicPath: '/assets/',
-    path: resolve('client/assets'),
-  },
-  module: {
-    rules: [{
-      test: /\.s?[ac]ss$/,
-      use: [
-        MiniCssExtractPlugin.loader,
-        'css-loader',
-        'sass-loader',
-      ],
-    },
-    {
-      test: /\.(woff2?|ttf|eot|svg)$/,
-      use: [{
-        loader: 'file-loader',
-        options: { name: 'fonts/[name].[ext]' },
-      }],
-    },
-    {
-      test: /\.(png|ico|jpe?g)$/,
-      use: [{
-        loader: 'file-loader',
-        options: { name: 'images/[name].[ext]' },
-      }],
-    },
-    ],
-  },
+  entry,
+  output,
+  module: webpackModule,
   plugins: [
     new CleanWebpackPlugin(),
     new ManifestPlugin({

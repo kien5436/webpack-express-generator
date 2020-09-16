@@ -1,21 +1,10 @@
 #!/usr/bin/env node
 
 const { createInterface } = require('readline');
-const { join, basename, isAbsolute, resolve } = require('path');
+const { basename, isAbsolute, join, resolve } = require('path');
 const { program } = require('commander');
-const {
-  constants: { F_OK },
-  promises: {
-    access,
-    copyFile,
-    mkdir,
-    opendir,
-    readdir,
-    readFile,
-    rmdir,
-    writeFile,
-  },
-} = require('fs');
+const { constants: { F_OK }, promises: { access, copyFile, mkdir, opendir, readdir, readFile, rmdir, writeFile } } = require('fs');
+const { execSync } = require('child_process');
 
 const { version: VERSION } = require('../package.json');
 const BOILERPLATE_DIR = join(__dirname, '../boilerplate');
@@ -31,6 +20,7 @@ program
   .option('--eslint <rule>', `eslint config support:
                  recommended: eslint recommendation,
                  pk: my recommendation for eslint`, setLinter)
+  .option('--style <type>', 'stylesheet support (css|sass|scss|less|styl)', setStyle, 'css')
   .option('-f, --force', 'force on non-empty directory')
   .action(run)
   .parse(process.argv);
@@ -42,7 +32,6 @@ async function run(projectName) {
     .replace(/^[-_.]+|-+$/g, '')
     .toLowerCase();
   const DEST_DIR = isAbsolute(projectName) ? projectName : resolve(process.cwd(), projectName);
-  console.info('webpack-express-cli.js:42: ', DEST_DIR);
 
   try {
     await access(DEST_DIR, F_OK);
@@ -56,12 +45,11 @@ async function run(projectName) {
   try {
     try {
       const dir = await opendir(DEST_DIR);
-      const { done: isEmpty } = await dir[Symbol.asyncIterator]()
-        .next();
+      const { done: isEmpty } = await dir[Symbol.asyncIterator]().next();
 
       if (!isEmpty && !program.force) {
 
-        const ok = await confirm('Destination is not empty, overwrite everything inside? [y/n] ');
+        const ok = await confirm('Destination is not empty, overwrite existing files? [y/n] ');
 
         if (ok) process.stdin.destroy();
         else {
@@ -71,14 +59,18 @@ async function run(projectName) {
         }
       }
 
-      await Promise.all([
-        generateApp(DEST_DIR),
-        ...generateEnv(DEST_DIR),
-        generatePackageJson(DEST_DIR, projectName),
-      ]);
+      await generateApp(DEST_DIR, projectName);
 
-      if (program.eslint) await generateEslint(DEST_DIR);
+      // install
+      // if (process.platform === 'win32') execSync(`cd /d ${DEST_DIR}`);
+      // else execSync(`cd ${DEST_DIR}`);
+      // console.log('Installing dependencies...');
+      // execSync('');
 
+      // // build
+      // console.log('Building...');
+
+      // done
       console.log('Your project is created at ' + DEST_DIR);
       console.log('To start, run:');
       console.log('npm i && npm run build && npm start');
@@ -87,9 +79,8 @@ async function run(projectName) {
     }
     catch (err) {
 
-      console.error(err);
-
       if ('EACCES' !== err.code) await rmdir(DEST_DIR, { maxRetries: 3, recursive: true });
+      else console.error('ERROR', err);
     }
   }
   catch (err) {
@@ -97,7 +88,52 @@ async function run(projectName) {
   }
 }
 
-async function generateApp(dest) {
+function setViewEngine(engine) {
+
+  const supportEngines = ['pug', 'ejs', 'hbs' ];
+
+  if (!supportEngines.includes(engine)) {
+
+    console.log('Unsupported view engine', engine, '\n');
+    program.help();
+    return;
+  }
+
+  /* eslint-disable-next-line consistent-return */
+  return engine;
+}
+
+function setLinter(rule) {
+
+  const supportRules = ['pk', 'recommended' ];
+
+  if (!supportRules.includes(rule)) {
+
+    console.log('Unsupported linting with', rule, '\n');
+    program.help();
+    return;
+  }
+
+  /* eslint-disable-next-line consistent-return */
+  return rule;
+}
+
+function setStyle(type) {
+
+  const supportStyles = ['css', 'sass', 'scss', 'less', 'styl' ];
+
+  if (!supportStyles.includes(type)) {
+
+    console.log('Unsupported style', type, '\n');
+    program.help();
+    return;
+  }
+
+  /* eslint-disable-next-line consistent-return */
+  return type;
+}
+
+async function generateApp(dest, projectName) {
 
   const fileMap = require('../boilerplate/file-map');
   const mkdirs = [];
@@ -113,47 +149,64 @@ async function generateApp(dest) {
       mkdirs.push(mkdir(to, { mode: MODE_RWX, recursive: true }));
     }
     else {
-      if ('/config/app.js' === file.name) {
-
-        /* eslint-disable-next-line no-await-in-loop */
-        let [views, appContent] = await Promise.all([
-          getViews(),
-          readFile(from, 'utf8'),
-        ]);
-        appContent = appContent.replace('<@ engine @>', program.view);
-
-        /* eslint-disable-next-line no-await-in-loop */
-        await Promise.all(views.map((view) => copyFile(BOILERPLATE_DIR + view, dest + view)));
-        /* eslint-disable-next-line no-await-in-loop */
-        await writeFile(to, appContent, { encoding: 'utf8', mode: MODE_RW });
-      }
-      else mkfiles.push(copyFile(from, to));
+      /**
+       it is unsafe to call fsPromises.writeFile() multiple times on the same file without waiting for the Promise to be resolved (or rejected).
+       @see https://nodejs.org/api/fs.html#fs_fspromises_writefile_file_data_options
+       */
+      mkfiles.push({ from, to });
     }
   }
 
-  await Promise.all(mkdirs);
-  await Promise.all(mkfiles);
+  const clientScript = '/client/src/scripts/index.js';
+  const appConfig = '/config/app.js';
+
+  try {
+    let [views, appContent, clientScriptContent ] = await Promise.all([
+      getViews(),
+      readFile(BOILERPLATE_DIR + appConfig, 'utf8'),
+      readFile(BOILERPLATE_DIR + clientScript, 'utf8'),
+    ]);
+    appContent = appContent.replace('<@ engine @>', program.view);
+    clientScriptContent = clientScriptContent.replace('<@ style @>', program.style);
+
+    views.forEach((view) => mkfiles.push({ from: BOILERPLATE_DIR + view, to: dest + view }));
+    mkfiles.push(...createEnv(dest));
+    mkfiles.push(...await createWebpack(dest));
+    mkfiles.push(createPackageJson(dest, projectName));
+    mkfiles.push(await createStyle(dest));
+    mkfiles.push({ content: appContent, to: dest + appConfig });
+    mkfiles.push({ content: clientScriptContent, to: dest + clientScript });
+    if (program.eslint) mkfiles.push(...createEslint(dest));
+
+    await Promise.all(mkdirs);
+    await Promise.all(mkfiles.map((file) => (file.hasOwnProperty('content') ?
+      writeFile(file.to, file.content, { encoding: 'utf8', mode: MODE_RW }) :
+      copyFile(file.from, file.to))));
+  }
+  catch (err) {
+    console.error(err);
+  }
 }
 
-function generateEnv(dest) {
+function createEnv(dest) {
 
   return [
-    writeFile(dest + '/.env', 'PORT=3000', { encoding: 'utf8', mode: MODE_RW }),
-    writeFile(dest + '/.env.example', 'PORT=', { encoding: 'utf8', mode: MODE_RW }),
+    { content: 'PORT=3000', to: dest + '/.env' },
+    { content: 'PORT=', to: dest + '/.env.example' },
   ];
 }
 
-async function generateEslint(dest) {
+function createEslint(dest) {
 
   const eslintConfig = require('../boilerplate/eslint')(program.eslint);
 
-  await Promise.all([
-    writeFile(dest + '/.eslintrc.json', JSON.stringify(eslintConfig.node, null, 2), { mode: MODE_RW }),
-    writeFile(dest + '/client/.eslintrc.json', JSON.stringify(eslintConfig.browser, null, 2), { mode: MODE_RW }),
-  ]);
+  return [
+    { content: JSON.stringify(eslintConfig.node, null, 2), to: dest + '/.eslintrc.json' },
+    { content: JSON.stringify(eslintConfig.browser, null, 2), to: dest + '/client/.eslintrc.json' },
+  ];
 }
 
-function generatePackageJson(dest, projectName) {
+function createPackageJson(dest, projectName) {
 
   const packageContent = require('../boilerplate/package.js')(basename(projectName), !!program.eslint);
   let viewEngineVer = '';
@@ -172,37 +225,56 @@ function generatePackageJson(dest, projectName) {
   }
   packageContent.dependencies[program.view] = viewEngineVer;
 
-  return writeFile(dest + '/package.json', JSON.stringify(packageContent, null, 2), { mode: MODE_RW });
-}
-
-function setViewEngine(engine) {
-
-  const supportEngines = ['pug', 'ejs', 'hbs'];
-
-  if (!supportEngines.includes(engine)) {
-
-    console.log('Unsupported view engine', engine, '\n');
-    program.help();
-    return;
+  switch (program.style) {
+    case 'sass':
+    case 'scss':
+      packageContent.devDependencies['sass'] = '^1.26.10';
+      packageContent.devDependencies['sass-loader'] = '^7.1.0';
+      break;
+    case 'styl':
+      packageContent.devDependencies['stylus'] = '^0.54.8';
+      packageContent.devDependencies['stylus-loader'] = '^3.0.2';
+      break;
+    case 'less':
+      packageContent.devDependencies['less'] = '^3.12.2';
+      packageContent.devDependencies['less-loader'] = '^7.0.1';
+      break;
   }
 
-  /* eslint-disable-next-line consistent-return */
-  return engine;
-}
+  if (program.eslint) {
 
-function setLinter(rule) {
-
-  const supportRules = ['pk', 'recommended'];
-
-  if (!supportRules.includes(rule)) {
-
-    console.log('Unsupported linting with', rule, '\n');
-    program.help();
-    return;
+    packageContent.scripts.lint = 'eslint -c .eslintrc.json --ext .js .';
+    packageContent.devDependencies.eslint = '^7.8.1';
   }
 
-  /* eslint-disable-next-line consistent-return */
-  return rule;
+  return { content: JSON.stringify(packageContent, null, 2), to: dest + '/package.json' };
+}
+
+async function createStyle(dest) {
+
+  const ext = 'sass' === program.style || 'styl' === program.style ? 'sass' : 'css';
+  const content = await readFile(`${BOILERPLATE_DIR}/client/src/styles/index.${ext}`, 'utf8');
+
+  return { content, to: `${dest}/client/src/styles/index.${program.style}` };
+}
+
+async function createWebpack(dest) {
+
+  let [configDev, configProd ] = await Promise.all([
+    readFile(BOILERPLATE_DIR + filename('dev'), 'utf8'),
+    readFile(BOILERPLATE_DIR + filename('prod'), 'utf8'),
+  ]);
+  configDev = configDev.replace('<@ style @>', program.style);
+  configProd = configProd.replace('<@ style @>', program.style);
+
+  return [
+    { content: configDev, to: dest + filename('dev') },
+    { content: configProd, to: dest + filename('prod') },
+  ];
+
+  function filename(type) {
+    return `/client/webpack/config.${type}.js`;
+  }
 }
 
 async function getViews() {

@@ -32,14 +32,13 @@ Other options:
 ```
 Usage: we <project-name> [options]
 
-<project-name> can be relative or absolute path
-
 Options:
   -v, --version    output the version number
   --view <engine>  view engine support (pug|ejs|hbs) (default: "pug")
   --eslint <rule>  eslint config support:
                    recommended: eslint recommendation,
-                   pk: my recommendation for eslint (default: "recommended")
+                   pk: my recommendation for eslint
+  --style <type>   stylesheet support (css|sass|scss|less|styl) (default: "css")
   -f, --force      force on non-empty directory
   -h, --help       display help for command
 ```
@@ -52,6 +51,14 @@ webpackDevMiddleware(compiler, {
   serverSideRender: true,
   stats: 'normal', // change it
   writeToDisk: false,
+})
+```
+- To get the assets corresponding to the view, pass their names to `getAssets` middleware.
+```js
+router.get('/', getAssets('any', 'needed', 'asset'), (req, res, next) => {
+
+  const assets = res.locals.assets;
+  // do other things
 })
 ```
 

@@ -1,5 +1,6 @@
-const express = require('express');
 const { resolve } = require('path');
+const express = require('express');
+const logger = require('morgan');
 
 const app = express();
 const env = require('./env');
@@ -22,6 +23,9 @@ if ('production' !== env.NODE_ENV) {
   }));
 }
 app.set('view engine', '<@ engine @>');
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(setAssets);
 app.use('/assets', express.static(resolve('client/assets')));
 app.use('/', routes);

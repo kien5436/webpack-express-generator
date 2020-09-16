@@ -18,7 +18,7 @@ exports.getAssets = (...entries) => (req, res, next) => {
   for (let i = entries.length; 0 <= --i;) {
 
     asset = assets[entries[i]];
-    asset = Array.isArray(asset) ? asset : [asset];
+    asset = Array.isArray(asset) ? asset : [asset ];
 
     let cssPaths = asset.filter((path) => path.endsWith('.css'));
     let jsPaths = asset.filter((path) => path.endsWith('.js'));
@@ -29,8 +29,8 @@ exports.getAssets = (...entries) => (req, res, next) => {
       jsPaths = jsPaths.map((path) => '/assets/' + path);
     }
 
-    css = [...css, ...cssPaths];
-    js = [...js, ...jsPaths];
+    css = [...css, ...cssPaths ];
+    js = [...js, ...jsPaths ];
   }
 
   res.locals.assets = { css, js };
