@@ -23,9 +23,9 @@ we your-app
 ```
 Install dependencies and run the app:
 ```
-npm i && npm run build && npm start
+npm start
 # or
-yarn && yarn build && yarn start
+yarn start
 ```
 
 Other options:

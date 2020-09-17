@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 
-const { createInterface } = require('readline');
 const { basename, isAbsolute, join, resolve } = require('path');
-const { program } = require('commander');
 const { constants: { F_OK }, promises: { access, copyFile, mkdir, opendir, readdir, readFile, rmdir, writeFile } } = require('fs');
-const { execSync } = require('child_process');
+const { createInterface } = require('readline');
+const { exec, execSync } = require('child_process');
+const { program } = require('commander');
+const { Spinner } = require('cli-spinner');
 
 const { version: VERSION } = require('../package.json');
 const BOILERPLATE_DIR = join(__dirname, '../boilerplate');
@@ -61,21 +62,18 @@ async function run(projectName) {
 
       await generateApp(DEST_DIR, projectName);
 
+      const yarn = hasYarn();
+
       // install
-      // if (process.platform === 'win32') execSync(`cd /d ${DEST_DIR}`);
-      // else execSync(`cd ${DEST_DIR}`);
-      // console.log('Installing dependencies...');
-      // execSync('');
-
-      // // build
-      // console.log('Building...');
-
+      await shell(yarn ? 'yarn' : 'npm i', { cwd: DEST_DIR, text: 'Installing dependencies' });
+      // build
+      await shell(yarn ? 'yarn build' : 'npm run build', { cwd: DEST_DIR, text: 'Building' });
       // done
       console.log('Your project is created at ' + DEST_DIR);
-      console.log('To start, run:');
-      console.log('npm i && npm run build && npm start');
+      console.log('To start, navigate to it and run:');
+      console.log('npm start');
       console.log('or');
-      console.log('yarn && yarn build && yarn start');
+      console.log('yarn start');
     }
     catch (err) {
 
@@ -90,7 +88,7 @@ async function run(projectName) {
 
 function setViewEngine(engine) {
 
-  const supportEngines = ['pug', 'ejs', 'hbs' ];
+  const supportEngines = ['pug', 'ejs', 'hbs'];
 
   if (!supportEngines.includes(engine)) {
 
@@ -105,7 +103,7 @@ function setViewEngine(engine) {
 
 function setLinter(rule) {
 
-  const supportRules = ['pk', 'recommended' ];
+  const supportRules = ['pk', 'recommended'];
 
   if (!supportRules.includes(rule)) {
 
@@ -120,7 +118,7 @@ function setLinter(rule) {
 
 function setStyle(type) {
 
-  const supportStyles = ['css', 'sass', 'scss', 'less', 'styl' ];
+  const supportStyles = ['css', 'sass', 'scss', 'less', 'styl'];
 
   if (!supportStyles.includes(type)) {
 
@@ -161,7 +159,7 @@ async function generateApp(dest, projectName) {
   const appConfig = '/config/app.js';
 
   try {
-    let [views, appContent, clientScriptContent ] = await Promise.all([
+    let [views, appContent, clientScriptContent] = await Promise.all([
       getViews(),
       readFile(BOILERPLATE_DIR + appConfig, 'utf8'),
       readFile(BOILERPLATE_DIR + clientScript, 'utf8'),
@@ -260,7 +258,7 @@ async function createStyle(dest) {
 
 async function createWebpack(dest) {
 
-  let [configDev, configProd ] = await Promise.all([
+  let [configDev, configProd] = await Promise.all([
     readFile(BOILERPLATE_DIR + filename('dev'), 'utf8'),
     readFile(BOILERPLATE_DIR + filename('prod'), 'utf8'),
   ]);
@@ -309,5 +307,35 @@ function confirm(msg) {
       rl.close();
       _resolve(/^y|yes$/i.test(input));
     });
+  });
+}
+
+function hasYarn() {
+
+  try {
+    execSync('yarn -v', { stdio: 'ignore' });
+    return true;
+  }
+  catch (err) {
+    return false;
+  }
+}
+
+function shell(cmd, { cwd, text }) {
+
+  return new Promise((_resolve, reject) => {
+
+    const spinner = new Spinner(text);
+
+    spinner.setSpinnerString(27);
+    spinner.start();
+    const childProc = exec(cmd, { cwd, stdio: 'ignore' });
+    /* eslint-disable-next-line no-unused-vars */
+    childProc.on('exit', (code) => {
+
+      spinner.stop(true);
+      _resolve(undefined);
+    });
+    childProc.on('error', (err) => reject(err));
   });
 }
