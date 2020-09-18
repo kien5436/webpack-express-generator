@@ -17,11 +17,12 @@ program
   .version(VERSION, '-v, --version')
   .usage('<project-name> [options]')
   .arguments('<project-name>')
-  .option('--view <engine>', 'view engine support (pug|ejs|hbs)', setViewEngine, 'pug')
   .option('--eslint <rule>', `eslint config support:
                  recommended: eslint recommendation,
                  pk: my recommendation for eslint`, setLinter)
   .option('--style <type>', 'stylesheet support (css|sass|scss|less|styl)', setStyle, 'css')
+  .option('--view <engine>', 'view engine support (pug|ejs|hbs)', setViewEngine, 'pug')
+  .option('--babel', 'babel support', setBabel, false)
   .option('-f, --force', 'force on non-empty directory')
   .action(run)
   .parse(process.argv);
@@ -71,9 +72,7 @@ async function run(projectName) {
       // done
       console.log('Your project is created at ' + DEST_DIR);
       console.log('To start, navigate to it and run:');
-      console.log('npm start');
-      console.log('or');
-      console.log('yarn start');
+      console.log(yarn ? 'yarn start' : 'npm start');
     }
     catch (err) {
 
@@ -131,6 +130,8 @@ function setStyle(type) {
   return type;
 }
 
+function setBabel(value) { return !!value; }
+
 async function generateApp(dest, projectName) {
 
   const fileMap = require('../boilerplate/file-map');
@@ -147,6 +148,7 @@ async function generateApp(dest, projectName) {
       mkdirs.push(mkdir(to, { mode: MODE_RWX, recursive: true }));
     }
     else {
+      if (file.name.includes('babel') && !program.babel) continue;
       /**
        it is unsafe to call fsPromises.writeFile() multiple times on the same file without waiting for the Promise to be resolved (or rejected).
        @see https://nodejs.org/api/fs.html#fs_fspromises_writefile_file_data_options
@@ -206,7 +208,7 @@ function createEslint(dest) {
 
 function createPackageJson(dest, projectName) {
 
-  const packageContent = require('../boilerplate/package.js')(basename(projectName), !!program.eslint);
+  const pkgContent = require('../boilerplate/package.js')(basename(projectName), !!program.eslint);
   let viewEngineVer = '';
 
   switch (program.view) {
@@ -221,31 +223,42 @@ function createPackageJson(dest, projectName) {
       viewEngineVer = '^2.0.4';
       break;
   }
-  packageContent.dependencies[program.view] = viewEngineVer;
+  pkgContent.dependencies[program.view] = viewEngineVer;
 
   switch (program.style) {
     case 'sass':
     case 'scss':
-      packageContent.devDependencies['sass'] = '^1.26.10';
-      packageContent.devDependencies['sass-loader'] = '^7.1.0';
+      pkgContent.devDependencies['sass'] = '^1.26.10';
+      pkgContent.devDependencies['sass-loader'] = '^7.1.0';
       break;
     case 'styl':
-      packageContent.devDependencies['stylus'] = '^0.54.8';
-      packageContent.devDependencies['stylus-loader'] = '^3.0.2';
+      pkgContent.devDependencies['stylus'] = '^0.54.8';
+      pkgContent.devDependencies['stylus-loader'] = '^3.0.2';
       break;
     case 'less':
-      packageContent.devDependencies['less'] = '^3.12.2';
-      packageContent.devDependencies['less-loader'] = '^7.0.1';
+      pkgContent.devDependencies['less'] = '^3.12.2';
+      pkgContent.devDependencies['less-loader'] = '^7.0.1';
       break;
   }
 
   if (program.eslint) {
 
-    packageContent.scripts.lint = 'eslint -c .eslintrc.json --ext .js .';
-    packageContent.devDependencies.eslint = '^7.8.1';
+    pkgContent.scripts.lint = 'eslint --ext .js .';
+    pkgContent.devDependencies.eslint = '^7.8.1';
+    if ('pk' === program.eslint) pkgContent.devDependencies['eslint-config-pk'] = '^1.0.0';
   }
 
-  return { content: JSON.stringify(packageContent, null, 2), to: dest + '/package.json' };
+  if (program.babel) {
+
+    pkgContent.dependencies['@babel/runtime'] = '^7.11.2';
+    pkgContent.dependencies['@babel/runtime-corejs3'] = '^7.11.2';
+    pkgContent.devDependencies['@babel/core'] = '^7.11.6';
+    pkgContent.devDependencies['@babel/plugin-transform-runtime'] = '^7.11.5';
+    pkgContent.devDependencies['@babel/preset-env'] = '^7.11.5';
+    pkgContent.devDependencies['babel-loader'] = '^8.1.0';
+  }
+
+  return { content: JSON.stringify(pkgContent, null, 2), to: dest + '/package.json' };
 }
 
 async function createStyle(dest) {
@@ -262,8 +275,8 @@ async function createWebpack(dest) {
     readFile(BOILERPLATE_DIR + filename('dev'), 'utf8'),
     readFile(BOILERPLATE_DIR + filename('prod'), 'utf8'),
   ]);
-  configDev = configDev.replace('<@ style @>', program.style);
-  configProd = configProd.replace('<@ style @>', program.style);
+  configDev = configDev.replace('<@ style @>', program.style).replace("'<@ babel @>'", program.babel);
+  configProd = configProd.replace('<@ style @>', program.style).replace("'<@ babel @>'", program.babel);
 
   return [
     { content: configDev, to: dest + filename('dev') },

@@ -60,6 +60,11 @@ module.exports = [
     'name': '/routes/index.js',
   },
   {
+    'isDir': false,
+    'level': 1,
+    'name': '/babel.config.json',
+  },
+  {
     'isDir': true,
     'level': 1,
     'name': '/client',

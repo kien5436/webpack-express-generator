@@ -1,7 +1,7 @@
 const { resolve } = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
-module.exports = ({ style }) => {
+module.exports = ({ babel, style }) => {
 
   const srcPath = resolve('client/src');
   const styleLoader = ['css-loader'];
@@ -19,7 +19,7 @@ module.exports = ({ style }) => {
       break;
   }
 
-  return {
+  const shared = {
     entry: {
       index: `${srcPath}/scripts/index.js`,
     },
@@ -53,4 +53,17 @@ module.exports = ({ style }) => {
       ],
     },
   };
+
+  babel && shared.module.rules.push({
+    test: /\.jsx?$/,
+    exclude: /node_modules/,
+    use: {
+      loader: 'babel-loader',
+      options: {
+        cacheDirectory: true,
+      }
+    }
+  });
+
+  return shared;
 }

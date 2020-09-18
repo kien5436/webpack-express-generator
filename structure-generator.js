@@ -11,7 +11,6 @@ const BOILERPLATE_DIR = join(__dirname, 'boilerplate');
     const dirents = await readDir(BOILERPLATE_DIR, 1);
     const files = [];
 
-
     for await (const file of dirents) files.push(file);
 
     const sortedFiles = files.sort((f1, f2) => f2.level - f1.level);

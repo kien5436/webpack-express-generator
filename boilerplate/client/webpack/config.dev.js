@@ -1,12 +1,12 @@
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
-const { entry, output, module: webpackModule } = require('./shared')({ style: '<@ style @>' });
+const shared = require('./shared')({ babel: '<@ babel @>', style: '<@ style @>' });
 
 module.exports = {
   mode: 'development',
-  entry,
-  output,
-  module: webpackModule,
+  entry: shared.entry,
+  output: shared.output,
+  module: shared.module,
   plugins: [
     new MiniCssExtractPlugin({ filename: 'css/[contenthash:7].css' }),
   ],
