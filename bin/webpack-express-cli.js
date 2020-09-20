@@ -18,11 +18,11 @@ program
   .usage('<project-name> [options]')
   .arguments('<project-name>')
   .option('--eslint <rule>', `eslint config support:
-                 recommended: eslint recommendation,
-                 pk: my recommendation for eslint`, setLinter)
+                   recommended: eslint recommendation,
+                   pk: my recommendation for eslint`, setLinter)
   .option('--style <type>', 'stylesheet support (css|sass|scss|less|styl)', setStyle, 'css')
   .option('--view <engine>', 'view engine support (pug|ejs|hbs)', setViewEngine, 'pug')
-  .option('--babel', 'babel support', setBabel, false)
+  .option('--babel [boolean]', 'babel support')
   .option('-f, --force', 'force on non-empty directory')
   .action(run)
   .parse(process.argv);
@@ -129,8 +129,6 @@ function setStyle(type) {
   /* eslint-disable-next-line consistent-return */
   return type;
 }
-
-function setBabel(value) { return !!value; }
 
 async function generateApp(dest, projectName) {
 
@@ -275,8 +273,8 @@ async function createWebpack(dest) {
     readFile(BOILERPLATE_DIR + filename('dev'), 'utf8'),
     readFile(BOILERPLATE_DIR + filename('prod'), 'utf8'),
   ]);
-  configDev = configDev.replace('<@ style @>', program.style).replace("'<@ babel @>'", program.babel);
-  configProd = configProd.replace('<@ style @>', program.style).replace("'<@ babel @>'", program.babel);
+  configDev = configDev.replace('<@ style @>', program.style).replace("'<@ babel @>'", !!program.babel);
+  configProd = configProd.replace('<@ style @>', program.style).replace("'<@ babel @>'", !!program.babel);
 
   return [
     { content: configDev, to: dest + filename('dev') },

@@ -4,7 +4,7 @@ Webpack good practice for Express project
 ## Build status
 ![npm](https://img.shields.io/npm/v/webpack-express-generator?style=flat-square)
 ![npm](https://img.shields.io/npm/dm/webpack-express-generator?style=flat-square)
-[![Build Status](https://img.shields.io/badge/build-developing-blue.svg)]()
+![Build Status](https://img.shields.io/badge/build-failed-important?style=flat-square)
 
 ## Why good but not best?
 Nothing is perfect, including this package. It only offers "good" options for the most common cases while developing with Webpack
@@ -33,14 +33,15 @@ Other options:
 Usage: we <project-name> [options]
 
 Options:
-  -v, --version    output the version number
-  --view <engine>  view engine support (pug|ejs|hbs) (default: "pug")
-  --eslint <rule>  eslint config support:
-                   recommended: eslint recommendation,
-                   pk: my recommendation for eslint
-  --style <type>   stylesheet support (css|sass|scss|less|styl) (default: "css")
-  -f, --force      force on non-empty directory
-  -h, --help       display help for command
+  -v, --version      output the version number
+  --eslint <rule>    eslint config support:
+                     recommended: eslint recommendation,
+                     pk: my recommendation for eslint
+  --style <type>     stylesheet support (css|sass|scss|less|styl) (default: "css")
+  --view <engine>    view engine support (pug|ejs|hbs) (default: "pug")
+  --babel [boolean]  babel support
+  -f, --force        force on non-empty directory
+  -h, --help         display help for command
 ```
 
 ## Additional infomations
