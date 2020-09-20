@@ -4,7 +4,7 @@ Webpack good practice for Express project
 ## Build status
 ![npm](https://img.shields.io/npm/v/webpack-express-generator?style=flat-square)
 ![npm](https://img.shields.io/npm/dm/webpack-express-generator?style=flat-square)
-![Build Status](https://img.shields.io/badge/build-failed-important?style=flat-square)
+![Build status](https://img.shields.io/badge/build-passing-success?style=flat-square)
 
 ## Why good but not best?
 Nothing is perfect, including this package. It only offers "good" options for the most common cases while developing with Webpack
@@ -21,7 +21,7 @@ Quick generate your app:
 ```
 we your-app
 ```
-Install dependencies and run the app:
+Run the app:
 ```
 npm start
 # or
