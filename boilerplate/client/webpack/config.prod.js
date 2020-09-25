@@ -5,12 +5,8 @@ const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const TerserJSPlugin = require('terser-webpack-plugin');
 
 const shared = require('./shared')({ babel: '<@ babel @>', style: '<@ style @>' });
-
-module.exports = {
+const base = {
   mode: 'production',
-  entry: shared.entry,
-  output: shared.output,
-  module: shared.module,
   plugins: [
     new CleanWebpackPlugin(),
     new ManifestPlugin({
@@ -43,3 +39,5 @@ module.exports = {
     ],
   },
 };
+
+module.exports = { ...base, ...shared };

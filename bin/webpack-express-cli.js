@@ -36,12 +36,17 @@ async function run(projectName) {
   const DEST_DIR = isAbsolute(projectName) ? projectName : resolve(process.cwd(), projectName);
 
   try {
-    await access(DEST_DIR, F_OK);
+    try {
+      await access(DEST_DIR, F_OK);
+    }
+    catch (err) {
+
+      await mkdir(DEST_DIR, { mode: MODE_RWX, recursive: true });
+      console.log(`Destination does not exist, create '${projectName}'`);
+    }
   }
   catch (err) {
-
-    await mkdir(DEST_DIR, { mode: MODE_RWX, recursive: true });
-    console.log(`Destination does not exist, create '${projectName}'`);
+    console.error(err);
   }
 
   try {
@@ -61,7 +66,7 @@ async function run(projectName) {
         }
       }
 
-      await generateApp(DEST_DIR, projectName);
+      await generateApp(DEST_DIR);
 
       const yarn = hasYarn();
 
@@ -77,7 +82,7 @@ async function run(projectName) {
     catch (err) {
 
       if ('EACCES' !== err.code) await rmdir(DEST_DIR, { maxRetries: 3, recursive: true });
-      else console.error('ERROR', err);
+      else console.error(err);
     }
   }
   catch (err) {
@@ -130,7 +135,7 @@ function setStyle(type) {
   return type;
 }
 
-async function generateApp(dest, projectName) {
+async function generateApp(dest) {
 
   const fileMap = require('../boilerplate/file-map');
   const mkdirs = [];
@@ -170,7 +175,7 @@ async function generateApp(dest, projectName) {
     views.forEach((view) => mkfiles.push({ from: BOILERPLATE_DIR + view, to: dest + view }));
     mkfiles.push(...createEnv(dest));
     mkfiles.push(...await createWebpack(dest));
-    mkfiles.push(createPackageJson(dest, projectName));
+    mkfiles.push(createPackageJson(dest));
     mkfiles.push(await createStyle(dest));
     mkfiles.push({ content: appContent, to: dest + appConfig });
     mkfiles.push({ content: clientScriptContent, to: dest + clientScript });
@@ -204,9 +209,9 @@ function createEslint(dest) {
   ];
 }
 
-function createPackageJson(dest, projectName) {
+function createPackageJson(dest) {
 
-  const pkgContent = require('../boilerplate/package.js')(basename(projectName), !!program.eslint);
+  const pkgContent = require('../boilerplate/package.js')(basename(dest), !!program.eslint);
   let viewEngineVer = '';
 
   switch (program.view) {

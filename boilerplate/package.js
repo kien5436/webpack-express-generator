@@ -30,6 +30,7 @@ module.exports = (name) => ({
     'ignore': [
       'node_modules/',
       'client/src/',
+      'client/assets/',
     ],
   },
 });
