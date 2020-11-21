@@ -5,30 +5,34 @@ const logger = require('morgan');
 const app = express();
 const env = require('./env');
 const routes = require('../routes');
-const { setAssets } = require('../middlewares/asset-manager');
 const errorHandler = require('../middlewares/error-handler');
+const webpackBuilder = require('../middlewares/webpack-builder');
 
-if ('production' !== env.NODE_ENV) {
+async function main() {
 
-  const webpackDevMiddleware = require('webpack-dev-middleware');
+  if ('production' !== env.NODE_ENV) {
+    app.use(webpackBuilder);
+  }
+  else {
+    try {
+      const webpackStats = await webpackBuilder();
 
-  const config = require('../client/webpack/config.dev');
-  const compiler = require('webpack')(config);
+      app.set('webpackStats', webpackStats);
+    }
+    catch (err) {
+      console.error(err);
+    }
+  }
 
-  app.use(webpackDevMiddleware(compiler, {
-    publicPath: config.output.publicPath,
-    serverSideRender: true,
-    stats: 'errors-warnings',
-    writeToDisk: false,
-  }));
+  app.set('view engine', '<@ engine @>');
+  app.use(logger('dev'));
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
+  app.use('/assets', express.static(resolve('client/assets')));
+  app.use('/', routes);
+  app.use(errorHandler);
 }
-app.set('view engine', '<@ engine @>');
-app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(setAssets);
-app.use('/assets', express.static(resolve('client/assets')));
-app.use('/', routes);
-app.use(errorHandler);
+
+main();
 
 module.exports = app;

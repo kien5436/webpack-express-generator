@@ -1,6 +1,6 @@
 const router = require('express').Router();
 
-const { getAssets } = require('../middlewares/asset-manager');
+const getAssets = require('../middlewares/extract-assets');
 
 router.get('/', getAssets('index'), (req, res, next) => {
 

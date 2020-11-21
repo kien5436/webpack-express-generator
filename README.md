@@ -54,9 +54,9 @@ webpackDevMiddleware(compiler, {
   writeToDisk: false,
 })
 ```
-- To get the assets corresponding to the view, pass their names to `getAssets` middleware.
+- To get the assets corresponding to the view, pass the entry name defined in webpack to `getAssets` middleware.
 ```js
-router.get('/', getAssets('any', 'needed', 'asset'), (req, res, next) => {
+router.get('/', getAssets('asset'), (req, res, next) => {
 
   const assets = res.locals.assets;
   // do other things
