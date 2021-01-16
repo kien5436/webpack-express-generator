@@ -24,11 +24,11 @@ function webpackMiddleware() {
         assets: true,
         assetsSort: 'name',
         entrypoints: true,
-        errors: true,
         errorDetails: true,
-        warnings: true,
+        errors: true,
         logging: 'warn',
         performance: true,
+        warnings: true,
       }));
     });
   });

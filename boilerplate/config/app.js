@@ -8,7 +8,7 @@ const routes = require('../routes');
 const errorHandler = require('../middlewares/error-handler');
 const webpackBuilder = require('../middlewares/webpack-builder');
 
-async function main() {
+(async function() {
 
   if ('production' !== env.NODE_ENV) {
     app.use(webpackBuilder);
@@ -24,15 +24,13 @@ async function main() {
     }
   }
 
-  app.set('view engine', '<@ engine @>');
-  app.use(logger('dev'));
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
-  app.use('/assets', express.static(resolve('client/assets')));
-  app.use('/', routes);
-  app.use(errorHandler);
-}
-
-main();
+  app.set('view engine', '<@ engine @>')
+    .use(logger('dev'))
+    .use(express.json())
+    .use(express.urlencoded({ extended: true }))
+    .use('/assets', express.static(resolve('client/assets')))
+    .use('/', routes)
+    .use(errorHandler);
+})();
 
 module.exports = app;

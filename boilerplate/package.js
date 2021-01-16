@@ -21,7 +21,6 @@ module.exports = (name) => ({
     'nodemon': '^1.19.1',
     'optimize-css-assets-webpack-plugin': '^5.0.1',
     'webpack': '4.44.1',
-    'webpack-cli': '^3.3.4',
     'webpack-dev-middleware': '^3.7.0',
   },
   'nodemonConfig': {

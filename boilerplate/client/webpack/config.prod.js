@@ -8,7 +8,7 @@ const base = {
   mode: 'production',
   plugins: [
     new CleanWebpackPlugin(),
-    new MiniCssExtractPlugin({ filename: 'css/[contenthash:7].css' }),
+    new MiniCssExtractPlugin({ filename: '[contenthash:7].css' }),
   ],
   optimization: {
     splitChunks: { chunks: 'all' },

@@ -38,7 +38,7 @@ module.exports = (entry) => (req, res, next) => {
 
   for (let i = assets.length; 0 <= --i;) {
 
-    const asset = 'assets/' + assets[i];
+    const asset = '/assets/' + assets[i];
 
     if (asset.endsWith('.css')) {
       css.push(asset);

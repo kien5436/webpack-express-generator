@@ -37,17 +37,10 @@ module.exports = ({ babel, style }) => {
           ],
         },
         {
-          test: /\.(woff2?|ttf|eot|svg)$/,
+          test: /\.(woff2?|ttf|eot|svg|png|ico|jpe?g)$/,
           use: [{
             loader: 'file-loader',
-            options: { name: 'fonts/[name].[ext]' },
-          }],
-        },
-        {
-          test: /\.(png|ico|jpe?g)$/,
-          use: [{
-            loader: 'file-loader',
-            options: { name: 'images/[name].[ext]' },
+            options: { name: '[name].[ext]' },
           }],
         },
       ],
