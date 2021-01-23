@@ -7,36 +7,48 @@ const configProd = require('../client/webpack/config.prod');
 
 const compiler = webpack('production' !== env.NODE_ENV ? configDev : configProd);
 
-function webpackMiddleware() {
+async function webpackProdMiddleware(req, res, next) {
 
-  return new Promise((resolve, reject) => {
+  try {
+    if (!res.app.get('webpackStats')) {
 
-    compiler.run((err, stats) => {
+      console.log('webpack: building');
 
-      if (err) {
+      const webpackStats = await new Promise((resolve, reject) => {
 
-        reject(err);
-        return;
-      }
+        compiler.run((err, stats) => {
 
-      resolve(stats.toJson({
-        all: false,
-        assets: true,
-        assetsSort: 'name',
-        entrypoints: true,
-        errorDetails: true,
-        errors: true,
-        logging: 'warn',
-        performance: true,
-        warnings: true,
-      }));
-    });
-  });
+          if (err) {
+
+            reject(err);
+            return;
+          }
+
+          resolve(stats.toJson({
+            all: false,
+            assets: true,
+            assetsSort: 'name',
+            entrypoints: true,
+            errorDetails: true,
+            errors: true,
+            logging: 'warn',
+            performance: true,
+            warnings: true,
+          }));
+        });
+      });
+      req.app.set('webpackStats', webpackStats);
+    }
+    next();
+  }
+  catch (err) {
+    next(err);
+  }
 }
 
 module.exports = 'production' !== env.NODE_ENV ? webpackDevMiddleware(compiler, {
   publicPath: configDev.output.publicPath,
   serverSideRender: true,
-  stats: 'normal',
+  stats: 'minimal',
   writeToDisk: false,
-}) : webpackMiddleware;
+}) : webpackProdMiddleware;

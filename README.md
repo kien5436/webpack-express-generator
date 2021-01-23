@@ -2,8 +2,7 @@
 Webpack good practice for Express project
 
 ## Build status
-![npm](https://img.shields.io/npm/v/webpack-express-generator?style=flat-square)
-![npm](https://img.shields.io/npm/dm/webpack-express-generator?style=flat-square)
+[![npm]][npm-url]
 ![Build status](https://img.shields.io/badge/build-passing-success?style=flat-square)
 
 ## Why good but not best?
@@ -62,6 +61,17 @@ router.get('/', getAssets('asset'), (req, res, next) => {
   // do other things
 })
 ```
+- Tip: `webpack-dev-middleware` will suspend all requests until the building progress is finish. To ignore requests which don't require assets, you may follow below instruction:
+```js
+const webpackBuilder = require('../middlewares/webpack-builder');
+
+app.use('/api', apiRoutes);
+// use webpackBuilder at a seperate path
+app.use('/', webpackBuilder, otherRoutes);
+```
 
 ## License
 [MIT](LICENSE)
+
+[npm]: https://img.shields.io/npm/v/webpack-express-generator?style=flat-square
+[npm-url]: https://www.npmjs.com/package/webpack-express-generator

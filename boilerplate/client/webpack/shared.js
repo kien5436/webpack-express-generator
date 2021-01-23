@@ -24,7 +24,7 @@ module.exports = ({ babel, style }) => {
       index: `${srcPath}/scripts/index.js`,
     },
     output: {
-      filename: 'js/[contenthash:7].js',
+      filename: '[contenthash:7].js',
       publicPath: '/assets/',
       path: resolve('client/assets'),
     },
