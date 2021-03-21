@@ -3,6 +3,7 @@ Webpack good practice for Express project
 
 ## Build status
 [![npm]][npm-url]
+![npm](https://img.shields.io/npm/dw/webpack-express-generator?style=flat-square)
 ![Build status](https://img.shields.io/badge/build-passing-success?style=flat-square)
 
 ## Why good but not best?
