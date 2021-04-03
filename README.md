@@ -45,6 +45,7 @@ Options:
 ```
 
 ## Additional infomations
+- To use "JSON with comments", change `Language Mode` of file to `JSONC` or remove comments if your editor doesn't support this
 - To avoid polluting server's console, I set `webpack-dev-middleware` to log only if there is any error or warning. To see what `webpack` does, change `stats` to `normal`
 ```js
 webpackDevMiddleware(compiler, {

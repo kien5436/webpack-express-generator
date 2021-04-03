@@ -1,6 +1,6 @@
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
-const shared = require('./shared')({ babel: '<@ babel @>', style: '<@ style @>' });
+const shared = require('./shared');
 const base = {
   mode: 'development',
   plugins: [

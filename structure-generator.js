@@ -26,7 +26,7 @@ const BOILERPLATE_DIR = join(__dirname, 'boilerplate');
 async function* readDir(dir, level) {
 
   const files = await readdir(dir, { withFileTypes: true });
-  const excludeFiles = ['app.js', 'eslint.js', 'file-map.js', 'package.js', 'config.dev.js', 'config.prod.js'];
+  const excludeFiles = ['app.js', 'eslint.js', 'file-map.js', 'package.js', 'shared.js'];
   const excludeExtensions = ['.ejs', '.pug', '.hbs', '.css', '.sass', '.scss', '.less', '.styl'];
 
   for (const file of files) {

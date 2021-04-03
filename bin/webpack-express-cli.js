@@ -22,7 +22,7 @@ program
                    pk: my recommendation for eslint`, setLinter)
   .option('--style <type>', 'stylesheet support (css|sass|scss|less|styl)', setStyle, 'css')
   .option('--view <engine>', 'view engine support (pug|ejs|hbs)', setViewEngine, 'pug')
-  .option('--babel [boolean]', 'babel support')
+  .option('--babel', 'babel support')
   .option('-f, --force', 'force on non-empty directory')
   .action(run)
   .parse(process.argv);
@@ -41,8 +41,8 @@ async function run(projectName) {
     }
     catch (err) {
 
-      await mkdir(DEST_DIR, { mode: MODE_RWX, recursive: true });
       console.log(`Destination does not exist, create '${projectName}'`);
+      await mkdir(DEST_DIR, { mode: MODE_RWX, recursive: true });
     }
   }
   catch (err) {
@@ -164,18 +164,18 @@ async function generateApp(dest) {
   const appConfig = '/config/app.js';
 
   try {
-    let [views, appContent, clientScriptContent] = await Promise.all([
-      getViews(),
+    let [view, appContent, clientScriptContent] = await Promise.all([
+      getView(),
       readFile(BOILERPLATE_DIR + appConfig, 'utf8'),
       readFile(BOILERPLATE_DIR + clientScript, 'utf8'),
     ]);
     appContent = appContent.replace('<@ engine @>', program.view);
     clientScriptContent = clientScriptContent.replace('<@ style @>', program.style);
 
-    views.forEach((view) => mkfiles.push({ from: BOILERPLATE_DIR + view, to: dest + view }));
+    mkfiles.push({ from: BOILERPLATE_DIR + view, to: dest + view });
     mkfiles.push(...createEnv(dest));
-    mkfiles.push(...await createWebpack(dest));
     mkfiles.push(createPackageJson(dest));
+    mkfiles.push(createWebpack(dest));
     mkfiles.push(await createStyle(dest));
     mkfiles.push({ content: appContent, to: dest + appConfig });
     mkfiles.push({ content: clientScriptContent, to: dest + clientScript });
@@ -187,7 +187,9 @@ async function generateApp(dest) {
       copyFile(file.from, file.to))));
   }
   catch (err) {
-    console.error(err);
+
+    console.log(err);
+    throw err;
   }
 }
 
@@ -272,37 +274,25 @@ async function createStyle(dest) {
   return { content, to: `${dest}/client/src/styles/index.${program.style}` };
 }
 
-async function createWebpack(dest) {
+function createWebpack(dest) {
 
-  let [configDev, configProd] = await Promise.all([
-    readFile(BOILERPLATE_DIR + filename('dev'), 'utf8'),
-    readFile(BOILERPLATE_DIR + filename('prod'), 'utf8'),
-  ]);
-  configDev = configDev.replace('<@ style @>', program.style).replace("'<@ babel @>'", !!program.babel);
-  configProd = configProd.replace('<@ style @>', program.style).replace("'<@ babel @>'", !!program.babel);
+  const config = require('../boilerplate/client/webpack/shared')({
+    babel: !!program.babel,
+    style: program.style,
+  });
 
-  return [
-    { content: configDev, to: dest + filename('dev') },
-    { content: configProd, to: dest + filename('prod') },
-  ];
-
-  function filename(type) {
-    return `/client/webpack/config.${type}.js`;
-  }
+  return { content: config, to: dest + '/client/webpack/shared.js' };
 }
 
-async function getViews() {
+async function getView() {
 
   const files = await readdir(BOILERPLATE_DIR + '/views', { withFileTypes: true });
   const ext = '.' + program.view;
-  const views = [];
 
   for (const file of files) {
 
-    if (file.name.endsWith(ext)) views.push('/views/' + file.name);
+    if (file.name.endsWith(ext)) return '/views/' + file.name;
   }
-
-  return views;
 }
 
 /**

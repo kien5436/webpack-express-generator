@@ -3,7 +3,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const TerserJSPlugin = require('terser-webpack-plugin');
 
-const shared = require('./shared')({ babel: '<@ babel @>', style: '<@ style @>' });
+const shared = require('./shared');
 const base = {
   mode: 'production',
   plugins: [
