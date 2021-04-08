@@ -23,7 +23,7 @@
   "name": "webpack-express-generator",
   "preferGlobal": true,
   "repository": "https://github.com/shhlkien/webpack-express-generator",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "scripts": {
     "lint": "eslint --ext .js ."
   },

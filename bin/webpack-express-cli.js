@@ -72,9 +72,8 @@ async function run(projectName) {
 
       // install
       await shell(yarn ? 'yarn' : 'npm i', { cwd: DEST_DIR, text: 'Installing dependencies' });
-      // build
-      await shell(yarn ? 'yarn build' : 'npm run build', { cwd: DEST_DIR, text: 'Building' });
       // done
+      console.clear();
       console.log('Your project is created at ' + DEST_DIR);
       console.log('To start, navigate to it and run:');
       console.log(yarn ? 'yarn start' : 'npm start');

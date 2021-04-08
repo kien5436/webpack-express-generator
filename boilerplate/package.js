@@ -16,12 +16,11 @@ module.exports = (name) => ({
     'clean-webpack-plugin': '^3.0.0',
     'cross-env': '^5.2.0',
     'css-loader': '^3.0.0',
-    'file-loader': '^4.0.0',
+    "css-minimizer-webpack-plugin": "^1.3.0",
     'mini-css-extract-plugin': '^0.7.0',
     'nodemon': '^1.19.1',
-    'optimize-css-assets-webpack-plugin': '^5.0.1',
-    'webpack': '4.44.1',
-    'webpack-dev-middleware': '^3.7.0',
+    'webpack': '^5.30.0',
+    'webpack-dev-middleware': '^4.1.0',
   },
   'nodemonConfig': {
     'ignore': [

@@ -39,7 +39,7 @@ Options:
                      pk: my recommendation for eslint
   --style <type>     stylesheet support (css|sass|scss|less|styl) (default: "css")
   --view <engine>    view engine support (pug|ejs|hbs) (default: "pug")
-  --babel [boolean]  babel support
+  --babel            babel support
   -f, --force        force on non-empty directory
   -h, --help         display help for command
 ```
@@ -63,7 +63,7 @@ router.get('/', getAssets('asset'), (req, res, next) => {
   // do other things
 })
 ```
-- Tip: `webpack-dev-middleware` will suspend all requests until the building progress is finish. To ignore requests which don't require assets, you may follow below instruction:
+- Tip: `webpack-dev-middleware` will suspend all requests until the building progress is finished. To ignore requests which don't require assets, you may follow below instruction:
 ```js
 const webpackBuilder = require('../middlewares/webpack-builder');
 

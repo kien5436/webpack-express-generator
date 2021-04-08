@@ -1,4 +1,4 @@
-const env = require('../config/env');
+const { NODE_ENV } = require('../config/env');
 
 /**
  * extract assets from entries to the view,
@@ -7,7 +7,7 @@ const env = require('../config/env');
  */
 module.exports = (entry) => (req, res, next) => {
 
-  const webpackStats = 'production' !== env.NODE_ENV ? res.locals.webpackStats.toJson({
+  const webpackStats = 'production' !== NODE_ENV ? res.locals.webpack.devMiddleware.stats.toJson({
     all: false,
     assets: true,
     assetsSort: 'name',
@@ -38,7 +38,7 @@ module.exports = (entry) => (req, res, next) => {
 
   for (let i = assets.length; 0 <= --i;) {
 
-    const asset = '/assets/' + assets[i];
+    const asset = '/assets/' + assets[i].name;
 
     if (asset.endsWith('.css')) {
       css.push(asset);

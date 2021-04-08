@@ -1,6 +1,6 @@
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const TerserJSPlugin = require('terser-webpack-plugin');
 
 const shared = require('./shared');
@@ -14,10 +14,22 @@ const base = {
     splitChunks: { chunks: 'all' },
     minimizer: [
       new TerserJSPlugin({
-        cache: true,
+        extractComments: false,
+        terserOptions: {
+          format: {
+            comments: false,
+          },
+        },
         parallel: true,
       }),
-      new OptimizeCSSAssetsPlugin(),
+      new CssMinimizerPlugin({
+        minimizerOptions: {
+          preset: [
+            'default',
+            { discardComments: { removeAll: true } },
+          ],
+        },
+      }),
     ],
   },
 };

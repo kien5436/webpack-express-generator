@@ -18,6 +18,8 @@ module.exports = ({ babel, style }) => {
   return `const { resolve } = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
+const { NODE_ENV } = require('../../config/env');
+
 const srcPath = resolve('client/src');
 
 module.exports = {
@@ -25,9 +27,10 @@ module.exports = {
     index: \`\${srcPath}/scripts/index.js\`,
   },
   output: {
-    filename: '[contenthash:7].js',
+    filename: \`\${'production' === NODE_ENV ? '' : '[name].'}[contenthash:7].js\`,
     publicPath: '/assets/',
     path: resolve('client/assets'),
+    assetModuleFilename: '[name][ext]',
   },
   module: {
     rules: [{
@@ -39,10 +42,7 @@ module.exports = {
       },
       {
         test: /\\.(woff2?|ttf|eot|svg|png|ico|jpe?g)$/,
-        use: [{
-          loader: 'file-loader',
-          options: { name: '[name].[ext]' },
-        }],
+        type: 'asset/resource',
       },
     ${
       babel && `  {
