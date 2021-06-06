@@ -2,10 +2,9 @@ const webpack = require('webpack');
 const webpackDevMiddleware = require('webpack-dev-middleware');
 
 const { NODE_ENV } = require('../config/env');
-const configDev = require('../client/webpack/config.dev');
-const configProd = require('../client/webpack/config.prod');
+const config = require('../client/webpack')(NODE_ENV);
 
-const compiler = webpack('production' !== NODE_ENV ? configDev : configProd);
+const compiler = webpack(config);
 
 async function webpackProdMiddleware(req, res, next) {
 
@@ -47,7 +46,7 @@ async function webpackProdMiddleware(req, res, next) {
 }
 
 module.exports = 'production' !== NODE_ENV ? webpackDevMiddleware(compiler, {
-  publicPath: configDev.output.publicPath,
+  publicPath: config.output.publicPath,
   serverSideRender: true,
   stats: 'minimal',
   writeToDisk: false,

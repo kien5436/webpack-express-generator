@@ -2,111 +2,116 @@ module.exports = [
   {
     "isDir": false,
     "level": 4,
-    "name": "\\client\\src\\images\\favicon.ico"
+    "name": "/client/src/images/favicon.ico"
   },
   {
     "isDir": false,
     "level": 4,
-    "name": "\\client\\src\\scripts\\index.js"
+    "name": "/client/src/scripts/index.js"
   },
   {
     "isDir": true,
     "level": 3,
-    "name": "\\client\\src\\images"
+    "name": "/client/src/images"
   },
   {
     "isDir": true,
     "level": 3,
-    "name": "\\client\\src\\scripts"
+    "name": "/client/src/scripts"
   },
   {
     "isDir": true,
     "level": 3,
-    "name": "\\client\\src\\styles"
+    "name": "/client/src/styles"
   },
   {
     "isDir": false,
     "level": 3,
-    "name": "\\client\\webpack\\config.dev.js"
+    "name": "/client/webpack/config.dev.js"
   },
   {
     "isDir": false,
     "level": 3,
-    "name": "\\client\\webpack\\config.prod.js"
+    "name": "/client/webpack/config.prod.js"
+  },
+  {
+    "isDir": false,
+    "level": 3,
+    "name": "/client/webpack/index.js"
   },
   {
     "isDir": true,
     "level": 2,
-    "name": "\\client\\src"
+    "name": "/client/src"
   },
   {
     "isDir": true,
     "level": 2,
-    "name": "\\client\\webpack"
+    "name": "/client/webpack"
   },
   {
     "isDir": false,
     "level": 2,
-    "name": "\\config\\env.js"
+    "name": "/config/env.js"
   },
   {
     "isDir": false,
     "level": 2,
-    "name": "\\middlewares\\error-handler.js"
+    "name": "/middlewares/error-handler.js"
   },
   {
     "isDir": false,
     "level": 2,
-    "name": "\\middlewares\\extract-assets.js"
+    "name": "/middlewares/extract-assets.js"
   },
   {
     "isDir": false,
     "level": 2,
-    "name": "\\middlewares\\webpack-builder.js"
+    "name": "/middlewares/webpack-builder.js"
   },
   {
     "isDir": false,
     "level": 2,
-    "name": "\\routes\\index.js"
+    "name": "/routes/index.js"
   },
   {
     "isDir": false,
     "level": 1,
-    "name": "\\babel.config.json"
+    "name": "/babel.config.json"
   },
   {
     "isDir": true,
     "level": 1,
-    "name": "\\client"
+    "name": "/client"
   },
   {
     "isDir": true,
     "level": 1,
-    "name": "\\config"
+    "name": "/config"
   },
   {
     "isDir": false,
     "level": 1,
-    "name": "\\gitignore"
+    "name": "/gitignore"
   },
   {
     "isDir": false,
     "level": 1,
-    "name": "\\index.js"
+    "name": "/index.js"
   },
   {
     "isDir": true,
     "level": 1,
-    "name": "\\middlewares"
+    "name": "/middlewares"
   },
   {
     "isDir": true,
     "level": 1,
-    "name": "\\routes"
+    "name": "/routes"
   },
   {
     "isDir": true,
     "level": 1,
-    "name": "\\views"
+    "name": "/views"
   }
 ]

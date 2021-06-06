@@ -3,8 +3,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const TerserJSPlugin = require('terser-webpack-plugin');
 
-const shared = require('./shared');
-const base = {
+module.exports = {
   mode: 'production',
   plugins: [
     new CleanWebpackPlugin(),
@@ -33,5 +32,3 @@ const base = {
     ],
   },
 };
-
-module.exports = { ...base, ...shared };

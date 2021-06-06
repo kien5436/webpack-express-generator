@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const { promises: { readdir, writeFile } } = require('fs');
-const { join, resolve } = require('path');
+const { posix: { join, resolve } } = require('path');
 
 const BOILERPLATE_DIR = join(__dirname, 'boilerplate');
 

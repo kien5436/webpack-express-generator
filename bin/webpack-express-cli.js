@@ -212,19 +212,19 @@ function createEslint(dest) {
 
 function createPackageJson(dest) {
 
-  const pkgContent = require('../boilerplate/package.js')(basename(dest), !!program.eslint);
+  const pkgContent = require('../boilerplate/package.js')(basename(dest));
   let viewEngineVer = '';
 
   switch (program.view) {
     case 'hbs':
-      viewEngineVer = '^4.1.1';
+      viewEngineVer = 'latest';
       break;
     case 'ejs':
-      viewEngineVer = '^3.1.5';
+      viewEngineVer = 'latest';
       break;
     case 'pug':
     default:
-      viewEngineVer = '^2.0.4';
+      viewEngineVer = 'latest';
       break;
   }
   pkgContent.dependencies[program.view] = viewEngineVer;
@@ -232,34 +232,34 @@ function createPackageJson(dest) {
   switch (program.style) {
     case 'sass':
     case 'scss':
-      pkgContent.devDependencies['sass'] = '^1.26.10';
-      pkgContent.devDependencies['sass-loader'] = '^7.1.0';
+      pkgContent.devDependencies['sass'] = 'latest';
+      pkgContent.devDependencies['sass-loader'] = 'latest';
       break;
     case 'styl':
-      pkgContent.devDependencies['stylus'] = '^0.54.8';
-      pkgContent.devDependencies['stylus-loader'] = '^3.0.2';
+      pkgContent.devDependencies['stylus'] = 'latest';
+      pkgContent.devDependencies['stylus-loader'] = 'latest';
       break;
     case 'less':
-      pkgContent.devDependencies['less'] = '^3.12.2';
-      pkgContent.devDependencies['less-loader'] = '^7.0.1';
+      pkgContent.devDependencies['less'] = 'latest';
+      pkgContent.devDependencies['less-loader'] = 'latest';
       break;
   }
 
   if (program.eslint) {
 
     pkgContent.scripts.lint = 'eslint --ext .js .';
-    pkgContent.devDependencies.eslint = '^7.8.1';
-    if ('pk' === program.eslint) pkgContent.devDependencies['eslint-config-pk'] = '^1.0.0';
+    pkgContent.devDependencies.eslint = 'latest';
+    if ('pk' === program.eslint) pkgContent.devDependencies['eslint-config-pk'] = 'latest';
   }
 
   if (program.babel) {
 
-    pkgContent.dependencies['@babel/runtime'] = '^7.11.2';
-    pkgContent.dependencies['@babel/runtime-corejs3'] = '^7.11.2';
-    pkgContent.devDependencies['@babel/core'] = '^7.11.6';
-    pkgContent.devDependencies['@babel/plugin-transform-runtime'] = '^7.11.5';
-    pkgContent.devDependencies['@babel/preset-env'] = '^7.11.5';
-    pkgContent.devDependencies['babel-loader'] = '^8.1.0';
+    pkgContent.dependencies['@babel/runtime'] = 'latest';
+    pkgContent.dependencies['@babel/runtime-corejs3'] = 'latest';
+    pkgContent.devDependencies['@babel/core'] = 'latest';
+    pkgContent.devDependencies['@babel/plugin-transform-runtime'] = 'latest';
+    pkgContent.devDependencies['@babel/preset-env'] = 'latest';
+    pkgContent.devDependencies['babel-loader'] = 'latest';
   }
 
   return { content: JSON.stringify(pkgContent, null, 2), to: dest + '/package.json' };
@@ -307,7 +307,7 @@ function confirm(msg) {
       output: process.stdout,
     });
 
-    rl.question(msg, function(input) {
+    rl.question(msg, function (input) {
 
       rl.close();
       _resolve(/^y|yes$/i.test(input));
