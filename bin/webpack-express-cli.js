@@ -7,6 +7,7 @@ const { exec, execSync } = require('child_process');
 const { program } = require('commander');
 const { Spinner } = require('cli-spinner');
 
+const collectFileMap = require('./structure-generator');
 const { version: VERSION } = require('../package.json');
 const BOILERPLATE_DIR = join(__dirname, '../boilerplate');
 const MODE_RW = parseInt('0666', 8);
@@ -136,7 +137,7 @@ function setStyle(type) {
 
 async function generateApp(dest) {
 
-  const fileMap = require('../boilerplate/file-map');
+  const fileMap = await collectFileMap();
   const mkdirs = [];
   const mkfiles = [];
 
