@@ -7,15 +7,14 @@ const routes = require('../routes');
 const errorHandler = require('../middlewares/error-handler');
 const webpackBuilder = require('../middlewares/webpack-builder');
 
-(function() {
+(function () {
 
   app.set('view engine', '<@ engine @>')
     .use(express.json())
     .use(express.urlencoded({ extended: true }))
     .use('/assets', express.static(resolve('client/assets')))
-    .use(webpackBuilder)
     .use(logger('dev'))
-    .use('/', routes)
+    .use('/', webpackBuilder, routes)
     .use(errorHandler);
 })();
 

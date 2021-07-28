@@ -30,7 +30,7 @@ module.exports = {
     filename: \`\${'production' === NODE_ENV ? '' : '[name].'}[contenthash:7].js\`,
     publicPath: '/assets/',
     path: resolve('client/assets'),
-    assetModuleFilename: '[name][ext]',
+    assetModuleFilename: \`\${'production' === NODE_ENV ? '' : '[name].'}[contenthash:7][ext]\`,
   },
   module: {
     rules: [{
@@ -44,8 +44,7 @@ module.exports = {
         test: /\\.(woff2?|ttf|eot|svg|png|ico|jpe?g)$/,
         type: 'asset/resource',
       },
-    ${
-      babel && `  {
+    ${babel && `  {
         test: /\\.jsx?$/,
         exclude: /node_modules/,
         use: {
