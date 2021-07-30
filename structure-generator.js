@@ -1,9 +1,11 @@
+#!/usr/bin/env node
+
 const { promises: { readdir, writeFile } } = require('fs');
-const { join, resolve } = require('path');
+const { posix: { join, resolve } } = require('path');
 
-const BOILERPLATE_DIR = join(__dirname, '../boilerplate');
+const BOILERPLATE_DIR = join(__dirname, 'boilerplate');
 
-module.exports = async () => {
+(async () => {
 
   try {
     const dirents = await readDir(BOILERPLATE_DIR, 1);
@@ -11,12 +13,15 @@ module.exports = async () => {
 
     for await (const file of dirents) files.push(file);
 
-    return files.sort((f1, f2) => f2.level - f1.level);
+    const sortedFiles = files.sort((f1, f2) => f2.level - f1.level);
+    const content = `module.exports = ${JSON.stringify(sortedFiles, null, 2)}`;
+
+    await writeFile(BOILERPLATE_DIR + '/file-map.js', content, 'utf8');
   }
   catch (err) {
     console.error(err);
   }
-};
+})();
 
 async function* readDir(dir, level) {
 
@@ -36,7 +41,7 @@ async function* readDir(dir, level) {
     yield {
       isDir: file.isDirectory(),
       level,
-      name: realPath.replace(BOILERPLATE_DIR, '').replace(/\\/g, '/'),
+      name: realPath.replace(BOILERPLATE_DIR, ''),
     };
   }
 }
