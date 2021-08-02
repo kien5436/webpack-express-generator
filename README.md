@@ -63,7 +63,7 @@ router.get('/', getAssets('asset'), (req, res, next) => {
   // do other things
 })
 ```
-- Tip: `webpack-dev-middleware` will suspend all requests until the building progress is finished. To ignore requests which don't require assets, you may follow below instruction:
+- Tip: `webpack-dev-middleware` will suspend all requests until the building progress is finished. To ignore requests which don't require any asset, you may follow below instruction:
 ```js
 const webpackBuilder = require('../middlewares/webpack-builder');
 

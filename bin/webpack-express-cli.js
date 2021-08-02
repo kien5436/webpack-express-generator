@@ -63,7 +63,6 @@ async function run(projectName) {
         else {
           console.log('aborted');
           process.exit(1);
-          return;
         }
       }
 
