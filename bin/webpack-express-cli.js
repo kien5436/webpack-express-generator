@@ -159,7 +159,7 @@ async function generateApp(dest) {
     }
   }
 
-  const clientScript = '/client/src/scripts/index.js';
+  const clientScript = '/public/src/index.js';
   const appConfig = '/config/app.js';
 
   try {
@@ -206,7 +206,7 @@ function createEslint(dest) {
 
   return [
     { content: JSON.stringify(eslintConfig.node, null, 2), to: dest + '/.eslintrc.json' },
-    { content: JSON.stringify(eslintConfig.browser, null, 2), to: dest + '/client/.eslintrc.json' },
+    { content: JSON.stringify(eslintConfig.browser, null, 2), to: dest + '/public/.eslintrc.json' },
   ];
 }
 
@@ -268,19 +268,19 @@ function createPackageJson(dest) {
 async function createStyle(dest) {
 
   const ext = 'sass' === program.style || 'styl' === program.style ? 'sass' : 'css';
-  const content = await readFile(`${BOILERPLATE_DIR}/client/src/styles/index.${ext}`, 'utf8');
+  const content = await readFile(`${BOILERPLATE_DIR}/public/src/index.${ext}`, 'utf8');
 
-  return { content, to: `${dest}/client/src/styles/index.${program.style}` };
+  return { content, to: `${dest}/public/src/index.${program.style}` };
 }
 
 function createWebpack(dest) {
 
-  const config = require('../boilerplate/client/webpack/shared')({
+  const config = require('../boilerplate/webpack/shared')({
     babel: !!program.babel,
     style: program.style,
   });
 
-  return { content: config, to: dest + '/client/webpack/shared.js' };
+  return { content: config, to: dest + '/webpack/shared.js' };
 }
 
 async function getView() {

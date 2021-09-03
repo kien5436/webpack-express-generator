@@ -18,18 +18,19 @@ module.exports = ({ babel, style }) => {
   return `const { resolve } = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
-const { NODE_ENV } = require('../../config/env');
+const { NODE_ENV } = require('../config/env');
 
-const srcPath = resolve('client/src');
+const srcPath = resolve('public/src');
 
+/** @type import('webpack').Configuration */
 module.exports = {
   entry: {
-    index: \`\${srcPath}/scripts/index.js\`,
+    index: \`\${srcPath}/index.js\`,
   },
   output: {
     filename: \`\${'production' === NODE_ENV ? '' : '[name].'}[contenthash:7].js\`,
     publicPath: '/assets/',
-    path: resolve('client/assets'),
+    path: resolve('public/assets'),
     assetModuleFilename: \`\${'production' === NODE_ENV ? '' : '[name].'}[contenthash:7][ext]\`,
   },
   module: {

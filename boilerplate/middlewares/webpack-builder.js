@@ -3,7 +3,7 @@ const webpack = require('webpack');
 const webpackDevMiddleware = require('webpack-dev-middleware');
 
 const { NODE_ENV } = require('../config/env');
-const config = require('../client/webpack')(NODE_ENV);
+const config = require('../webpack')(NODE_ENV);
 
 const compiler = webpack(config);
 const statsOptions = {

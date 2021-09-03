@@ -1,7 +1,9 @@
+const others = {};
+
 /**
  * extract assets from entries to the view,
  * assets available at `res.locals.assets`
- * @param  {string} entry entry name defined in webpack
+ * @param {string} entry entry name defined in webpack
  */
 module.exports = (entry) => (req, res, next) => {
 
@@ -25,22 +27,18 @@ module.exports = (entry) => (req, res, next) => {
   const assetsOfEntry = entrypoints[entry].assets;
   const css = [];
   const js = [];
-  const others = [];
+  others[entry] = Array.isArray(others[entry]) ? others[entry] : [];
 
   for (let i = assets.length; --i >= 0;) {
 
-    if (assets[i].chunkNames.includes(entry) || assets[i].auxiliaryChunkNames.includes(entry)) {
+    let asset = assets[i];
 
-      const asset = '/assets/' + assets[i].name;
+    if (asset.chunkNames && asset.chunkNames.includes(entry) || asset.auxiliaryChunkNames && asset.auxiliaryChunkNames.includes(entry)) {
 
-      if (asset.endsWith('.css')) {
-        css.push(asset);
-      }
-      else if (asset.endsWith('.js')) {
-        js.push(asset);
-      }
-      else {
-        others.push(asset);
+      asset = '/assets/' + asset.name;
+
+      if (!asset.endsWith('.css') && !asset.endsWith('.js') && !others[entry].includes(asset)) {
+        others[entry].push(asset);
       }
     }
   }
@@ -49,15 +47,15 @@ module.exports = (entry) => (req, res, next) => {
 
     const asset = '/assets/' + assetsOfEntry[i].name;
 
-    if (asset.endsWith('.css') && !css.includes(asset)) {
+    if (asset.endsWith('.css')) {
       css.push(asset);
     }
-    else if (asset.endsWith('.js') && !js.includes(asset)) {
+    else if (asset.endsWith('.js')) {
       js.push(asset);
     }
   }
 
-  res.locals.assets = { css, js, others };
+  res.locals.assets = { css, js, others: others[entry] };
 
   next();
 };

@@ -26,8 +26,7 @@ module.exports = (name) => ({
   'nodemonConfig': {
     'ignore': [
       'node_modules/',
-      'client/src/',
-      'client/assets/',
+      'public/',
     ],
   },
 });

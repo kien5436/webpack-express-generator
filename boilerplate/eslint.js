@@ -1,7 +1,7 @@
 module.exports = (rule) => ({
   browser: {
     'extends': 'pk' === rule ? ['pk/eslint-browser'] : 'eslint:recommended',
-    'ignorePatterns': ['assets/**', 'webpack/**'],
+    'ignorePatterns': ['assets/**'],
   },
   node: 'pk' === rule ? { extends: 'pk' } : {
     'env': {

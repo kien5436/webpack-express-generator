@@ -23,7 +23,7 @@
       }
     ]
   ],
-  "only": ["./client/src/scripts"],
+  "only": ["./public/src/**"],
   "compact": true,
   "minified": true
 }
