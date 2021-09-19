@@ -1,10 +1,11 @@
-const { promisify } = require('util');
-const webpack = require('webpack');
-const webpackDevMiddleware = require('webpack-dev-middleware');
+import { promisify } from 'util';
+import webpack from 'webpack';
+import devMiddleware from 'webpack-dev-middleware';
 
-const { NODE_ENV } = require('../config/env');
-const config = require('../webpack')(NODE_ENV);
+import { NODE_ENV } from '../config/env';
+import wpConfig from '../webpack';
 
+const config = wpConfig(NODE_ENV);
 const compiler = webpack(config);
 const statsOptions = {
   all: false,
@@ -41,16 +42,21 @@ async function webpackProdMiddleware(req, res, next) {
   }
 }
 
-module.exports = 'production' !== NODE_ENV ? [webpackDevMiddleware(compiler, {
-  publicPath: config.output.publicPath,
-  serverSideRender: true,
-  stats: 'minimal',
-  writeToDisk: false,
-}), (req, res, next) => {
+function webpackDevMiddleware() {
 
-  const { assets, errors, warnings, entrypoints } = res.locals.webpack.devMiddleware.stats.toJson(statsOptions);
+  return [devMiddleware(compiler, {
+    publicPath: config.output.publicPath,
+    serverSideRender: true,
+    stats: 'minimal',
+    writeToDisk: false,
+  }), (req, res, next) => {
 
-  res.app.set('webpackStats', { assets, errors, warnings, entrypoints });
+    const { assets, errors, warnings, entrypoints } = res.locals.webpack.devMiddleware.stats.toJson(statsOptions);
 
-  next();
-}] : webpackProdMiddleware;
+    res.app.set('webpackStats', { assets, errors, warnings, entrypoints });
+
+    next();
+  }]
+}
+
+export default 'production' !== NODE_ENV ? webpackDevMiddleware() : webpackProdMiddleware;

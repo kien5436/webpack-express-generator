@@ -19,7 +19,7 @@ yarn global add webpack-express-generator
 ## How to use?
 Quick generate your app:
 ```
-we your-app
+we-create your-app
 ```
 Run the app:
 ```
@@ -30,7 +30,7 @@ yarn start
 
 Other options:
 ```
-Usage: we <project-name> [options]
+Usage: we-create <project-name> [options]
 
 Options:
   -v, --version      output the version number
@@ -39,6 +39,7 @@ Options:
                      pk: my recommendation for eslint
   --style <type>     stylesheet support (css|sass|scss|less|styl) (default: "css")
   --view <engine>    view engine support (pug|ejs|hbs) (default: "pug")
+  --resolver <type>  node module resolver (commonjs|module) (default: "commonjs")
   --babel            babel support
   -f, --force        force on non-empty directory
   -h, --help         display help for command
@@ -48,7 +49,7 @@ Options:
 - To use "JSON with comments", change `Language Mode` of file to `JSONC` or remove comments if your editor doesn't support this
 - To avoid polluting server's console, I set `webpack-dev-middleware` to log only if there is any error or warning. To see what `webpack` does, change `stats` to `normal`
 ```js
-webpackDevMiddleware(compiler, {
+devMiddleware(compiler, {
   publicPath: config.output.publicPath,
   serverSideRender: true,
   stats: 'normal', // change it

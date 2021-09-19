@@ -58,5 +58,8 @@ module.exports = {
     }
     ],
   },
+  plugins: [
+    new MiniCssExtractPlugin({ filename: \`\${'production' === NODE_ENV ? '' : '[name].'}[contenthash:7].css\` }),
+  ],
 };`;
 }

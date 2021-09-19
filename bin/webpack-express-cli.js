@@ -14,7 +14,7 @@ const MODE_RW = parseInt('0666', 8);
 const MODE_RWX = parseInt('0755', 8);
 
 program
-  .name('we')
+  .name('we-create')
   .version(VERSION, '-v, --version')
   .usage('<project-name> [options]')
   .arguments('<project-name>')
@@ -23,6 +23,7 @@ program
                    pk: my recommendation for eslint`, setLinter)
   .option('--style <type>', 'stylesheet support (css|sass|scss|less|styl)', setStyle, 'css')
   .option('--view <engine>', 'view engine support (pug|ejs|hbs)', setViewEngine, 'pug')
+  .option('--resolver <type>', 'node module resolver (commonjs|module)', setNodeModuleResolver, 'commonjs')
   .option('--babel', 'babel support')
   .option('-f, --force', 'force on non-empty directory')
   .action(run)
@@ -136,14 +137,15 @@ function setStyle(type) {
 
 async function generateApp(dest) {
 
-  const fileMap = await collectFileMap();
+  const moduleType = 'commonjs' === program.resolver ? 'cjs' : 'mjs';
+  const fileMap = await collectFileMap(moduleType);
   const mkdirs = [];
   const mkfiles = [];
 
   for (let i = fileMap.length; 0 <= --i;) {
 
     const file = fileMap[i];
-    const from = BOILERPLATE_DIR + file.name;
+    const from = `${BOILERPLATE_DIR}/${moduleType}/${file.name}`;
     const to = dest + (file.name.endsWith('gitignore') ? '/.gitignore' : file.name);
 
     if (file.isDir) {
@@ -164,18 +166,18 @@ async function generateApp(dest) {
 
   try {
     let [view, appContent, clientScriptContent] = await Promise.all([
-      getView(),
-      readFile(BOILERPLATE_DIR + appConfig, 'utf8'),
-      readFile(BOILERPLATE_DIR + clientScript, 'utf8'),
+      getView(moduleType),
+      readFile(`${BOILERPLATE_DIR}/${moduleType}/${appConfig}`, 'utf8'),
+      readFile(`${BOILERPLATE_DIR}/${moduleType}/${clientScript}`, 'utf8'),
     ]);
     appContent = appContent.replace('<@ engine @>', program.view);
     clientScriptContent = clientScriptContent.replace('<@ style @>', program.style);
 
-    mkfiles.push({ from: BOILERPLATE_DIR + view, to: dest + view });
+    mkfiles.push({ from: `${BOILERPLATE_DIR}/${moduleType + view}`, to: dest + view });
     mkfiles.push(...createEnv(dest));
-    mkfiles.push(createPackageJson(dest));
-    mkfiles.push(createWebpack(dest));
-    mkfiles.push(await createStyle(dest));
+    mkfiles.push(createPackageJson(dest, moduleType));
+    mkfiles.push(createWebpack(dest, moduleType));
+    mkfiles.push(await createStyle(dest, moduleType));
     mkfiles.push({ content: appContent, to: dest + appConfig });
     mkfiles.push({ content: clientScriptContent, to: dest + clientScript });
     if (program.eslint) mkfiles.push(...createEslint(dest));
@@ -210,9 +212,9 @@ function createEslint(dest) {
   ];
 }
 
-function createPackageJson(dest) {
+function createPackageJson(dest, moduleType) {
 
-  const pkgContent = require('../boilerplate/package.js')(basename(dest));
+  const pkgContent = require('../boilerplate/package.js')(basename(dest), moduleType);
   let viewEngineVer = '';
 
   switch (program.view) {
@@ -265,17 +267,17 @@ function createPackageJson(dest) {
   return { content: JSON.stringify(pkgContent, null, 2), to: dest + '/package.json' };
 }
 
-async function createStyle(dest) {
+async function createStyle(dest, moduleType) {
 
   const ext = 'sass' === program.style || 'styl' === program.style ? 'sass' : 'css';
-  const content = await readFile(`${BOILERPLATE_DIR}/public/src/index.${ext}`, 'utf8');
+  const content = await readFile(`${BOILERPLATE_DIR}/${moduleType}/public/src/index.${ext}`, 'utf8');
 
   return { content, to: `${dest}/public/src/index.${program.style}` };
 }
 
-function createWebpack(dest) {
+function createWebpack(dest, moduleType) {
 
-  const config = require('../boilerplate/webpack/shared')({
+  const config = require(`../boilerplate/${moduleType}/webpack/shared`)({
     babel: !!program.babel,
     style: program.style,
   });
@@ -283,9 +285,9 @@ function createWebpack(dest) {
   return { content: config, to: dest + '/webpack/shared.js' };
 }
 
-async function getView() {
+async function getView(moduleType) {
 
-  const files = await readdir(BOILERPLATE_DIR + '/views', { withFileTypes: true });
+  const files = await readdir(`${BOILERPLATE_DIR}/${moduleType}/views`, { withFileTypes: true });
   const ext = '.' + program.view;
 
   for (const file of files) {
@@ -343,4 +345,19 @@ function shell(cmd, { cwd, text }) {
     });
     childProc.on('error', (err) => reject(err));
   });
+}
+
+function setNodeModuleResolver(type) {
+
+  const supportResolvers = ['commonjs', 'module'];
+
+  if (!supportResolvers.includes(type)) {
+
+    console.log('Unsupported node module resolver', type, '\n');
+    program.help();
+    return;
+  }
+
+  /* eslint-disable-next-line consistent-return */
+  return type;
 }
