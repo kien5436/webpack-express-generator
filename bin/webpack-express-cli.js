@@ -70,14 +70,17 @@ async function run(projectName) {
       await generateApp(DEST_DIR);
 
       const yarn = hasYarn();
+      const { dependencies, devDependencies } = getDependencies();
 
       // install
-      await shell(yarn ? 'yarn' : 'npm i', { cwd: DEST_DIR, text: 'Installing dependencies' });
+      await shell(yarn ? 'yarn add ' + dependencies : 'npm i ' + dependencies, { cwd: DEST_DIR, text: 'Installing dependencies' });
+      await shell(yarn ? 'yarn add -D ' + devDependencies : 'npm i -D ' + devDependencies, { cwd: DEST_DIR, text: 'Installing dependencies' });
+      await shell(yarn ? 'yarn lint --fix' : 'npm run lint --fix', { cwd: DEST_DIR, text: 'Installing dependencies' });
       // done
       console.clear();
-      console.log('Your project is created at ' + DEST_DIR);
+      console.log('\x1b[0m%s \x1b[1m\x1b[34m%s\x1b[0m', 'Your project is created at', DEST_DIR);
       console.log('To start, navigate to it and run:');
-      console.log(yarn ? 'yarn start' : 'npm start');
+      console.log('\x1b[1m\x1b[34m%s\x1b[0m', `${yarn ? 'yarn' : 'npm'} start`);
     }
     catch (err) {
 
@@ -180,7 +183,7 @@ async function generateApp(dest) {
     mkfiles.push(await createStyle(dest, moduleType));
     mkfiles.push({ content: appContent, to: dest + appConfig });
     mkfiles.push({ content: clientScriptContent, to: dest + clientScript });
-    if (program.eslint) mkfiles.push(...createEslint(dest));
+    if (program.eslint) mkfiles.push(...createEslint(dest, moduleType));
 
     await Promise.all(mkdirs);
     await Promise.all(mkfiles.map((file) => (file.hasOwnProperty('content') ?
@@ -202,66 +205,23 @@ function createEnv(dest) {
   ];
 }
 
-function createEslint(dest) {
+function createEslint(dest, moduleType) {
 
   const eslintConfig = require('../boilerplate/eslint')(program.eslint);
 
   return [
-    { content: JSON.stringify(eslintConfig.node, null, 2), to: dest + '/.eslintrc.json' },
-    { content: JSON.stringify(eslintConfig.browser, null, 2), to: dest + '/public/.eslintrc.json' },
+    { content: 'module.exports = ' + JSON.stringify(eslintConfig.node, null, 2), to: dest + `/.eslintrc.${'cjs' === moduleType ? '' : 'c'}js` },
+    { content: 'module.exports = ' + JSON.stringify(eslintConfig.browser, null, 2), to: dest + `/public/.eslintrc.${'cjs' === moduleType ? '' : 'c'}js` },
   ];
 }
 
 function createPackageJson(dest, moduleType) {
 
   const pkgContent = require('../boilerplate/package.js')(basename(dest), moduleType);
-  let viewEngineVer = '';
-
-  switch (program.view) {
-    case 'hbs':
-      viewEngineVer = 'latest';
-      break;
-    case 'ejs':
-      viewEngineVer = 'latest';
-      break;
-    case 'pug':
-    default:
-      viewEngineVer = 'latest';
-      break;
-  }
-  pkgContent.dependencies[program.view] = viewEngineVer;
-
-  switch (program.style) {
-    case 'sass':
-    case 'scss':
-      pkgContent.devDependencies['sass'] = 'latest';
-      pkgContent.devDependencies['sass-loader'] = 'latest';
-      break;
-    case 'styl':
-      pkgContent.devDependencies['stylus'] = 'latest';
-      pkgContent.devDependencies['stylus-loader'] = 'latest';
-      break;
-    case 'less':
-      pkgContent.devDependencies['less'] = 'latest';
-      pkgContent.devDependencies['less-loader'] = 'latest';
-      break;
-  }
 
   if (program.eslint) {
 
     pkgContent.scripts.lint = 'eslint --ext .js .';
-    pkgContent.devDependencies.eslint = 'latest';
-    if ('pk' === program.eslint) pkgContent.devDependencies['eslint-config-pk'] = 'latest';
-  }
-
-  if (program.babel) {
-
-    pkgContent.dependencies['@babel/runtime'] = 'latest';
-    pkgContent.dependencies['@babel/runtime-corejs3'] = 'latest';
-    pkgContent.devDependencies['@babel/core'] = 'latest';
-    pkgContent.devDependencies['@babel/plugin-transform-runtime'] = 'latest';
-    pkgContent.devDependencies['@babel/preset-env'] = 'latest';
-    pkgContent.devDependencies['babel-loader'] = 'latest';
   }
 
   return { content: JSON.stringify(pkgContent, null, 2), to: dest + '/package.json' };
@@ -309,7 +269,7 @@ function confirm(msg) {
       output: process.stdout,
     });
 
-    rl.question(msg, function (input) {
+    rl.question(msg, function(input) {
 
       rl.close();
       _resolve(/^y|yes$/i.test(input));
@@ -360,4 +320,59 @@ function setNodeModuleResolver(type) {
 
   /* eslint-disable-next-line consistent-return */
   return type;
+}
+
+function getDependencies() {
+
+  const packages = {
+    dependencies: [
+      'dotenv',
+      'express',
+      'morgan',
+    ],
+    devDependencies: [
+      'clean-webpack-plugin',
+      'cross-env',
+      'css-loader',
+      'css-minimizer-webpack-plugin',
+      'mini-css-extract-plugin',
+      'nodemon',
+      'webpack',
+      'webpack-dev-middleware',
+      'webpack-merge',
+    ],
+  };
+
+  packages.dependencies.push(program.view);
+
+  switch (program.style) {
+    case 'sass':
+    case 'scss':
+      packages.devDependencies.push('sass', 'sass-loader');
+      break;
+    case 'styl':
+      packages.devDependencies.push('stylus', 'stylus-loader');
+      break;
+    case 'less':
+      packages.devDependencies.push('less', 'less-loader');
+      break;
+  }
+
+  if (program.eslint) {
+
+    packages.devDependencies.push('eslint');
+
+    if ('pk' === program.eslint) packages.devDependencies.push('eslint-config-pk');
+  }
+
+  if (program.babel) {
+
+    packages.dependencies.push('@babel/runtime', '@babel/runtime-corejs3');
+    packages.devDependencies.push('@babel/core', '@babel/plugin-transform-runtime', '@babel/preset-env', 'babel-loader');
+  }
+
+  return {
+    dependencies: packages.dependencies.join(' '),
+    devDependencies: packages.devDependencies.join(' '),
+  };
 }
