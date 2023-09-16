@@ -2,6 +2,10 @@ const { merge } = require('webpack-merge');
 
 const sharedConfig = require('./shared');
 
+/**
+ * @param {string} env
+ * @returns {import('webpack').Configuration}
+ */
 module.exports = (env) => {
 
   switch (env) {

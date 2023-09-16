@@ -10,7 +10,7 @@ module.exports = (rule) => ({
     },
     'extends': 'eslint:recommended',
     'ignorePatterns': ['**/node_modules/**'],
-    'parserOptions': { 'ecmaVersion': 12 },
+    'parserOptions': { 'ecmaVersion': 13 },
     'reportUnusedDisableDirectives': true,
   },
 });

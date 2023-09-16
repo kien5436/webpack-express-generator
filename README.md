@@ -7,7 +7,9 @@ Webpack good practice for Express project
 ![Build status](https://img.shields.io/badge/build-passing-success?style=flat-square)
 
 ## Why good but not best?
-Nothing is perfect, including this package. It only offers "good" options for the most common cases while developing with Webpack
+Nothing is perfect, including this package. It only offers "good" options for the most common cases while developing with Webpack.
+
+You may have heard about buil tools like Vite, rollup or some frameworks like Nestjs, Nextjs, etc. They generate boilerplate but particularly for backend or frontend only. Sometimes you want a mono project that contains both, you can try this package.
 
 ## Installation
 ```

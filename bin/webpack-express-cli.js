@@ -339,6 +339,7 @@ function getDependencies() {
       'nodemon',
       'webpack',
       'webpack-dev-middleware',
+      'webpack-hot-middleware',
       'webpack-merge',
     ],
   };

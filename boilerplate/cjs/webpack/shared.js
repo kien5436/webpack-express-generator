@@ -28,10 +28,10 @@ module.exports = {
     index: \`\${srcPath}/index.js\`,
   },
   output: {
-    filename: \`\${'production' === NODE_ENV ? '' : '[name].'}[contenthash:7].js\`,
+    filename: \`\${'production' === NODE_ENV ? '[contenthash:7]' : '[name]'}.js\`,
     publicPath: '/assets/',
     path: resolve('public/assets'),
-    assetModuleFilename: \`\${'production' === NODE_ENV ? '' : '[name].'}[contenthash:7][ext]\`,
+    assetModuleFilename: \`\${'production' === NODE_ENV ? '[contenthash:7]' : '[name]'}[ext]\`,
   },
   module: {
     rules: [{
@@ -59,7 +59,7 @@ module.exports = {
     ],
   },
   plugins: [
-    new MiniCssExtractPlugin({ filename: \`\${'production' === NODE_ENV ? '' : '[name].'}[contenthash:7].css\` }),
+    new MiniCssExtractPlugin({ filename: \`\${'production' === NODE_ENV ? '[contenthash:7]' : '[name]'}.css\` }),
   ],
 };`;
 }

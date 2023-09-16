@@ -8,14 +8,15 @@ import webpackBuilder from '../middlewares/webpack-builder';
 
 const app = express();
 
-export default function () {
+export default function() {
 
   app.set('view engine', '<@ engine @>')
     .use(express.json())
     .use(express.urlencoded({ extended: true }))
+    .use(webpackBuilder)
     .use('/assets', express.static(resolve('public/assets')))
     .use(logger('dev'))
-    .use('/', webpackBuilder, routes)
+    .use('/', routes)
     .use(errorHandler);
 
   return app;

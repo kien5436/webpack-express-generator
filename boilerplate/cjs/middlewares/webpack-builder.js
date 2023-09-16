@@ -1,11 +1,11 @@
 const { promisify } = require('util');
 const webpack = require('webpack');
-const devMiddleware = require('webpack-dev-middleware');
+const webpackDevMiddleware = require('webpack-dev-middleware');
+const webpackHotMiddleware = require('webpack-hot-middleware');
 
 const { NODE_ENV } = require('../config/env');
 const config = require('../webpack')(NODE_ENV);
 
-const compiler = webpack(config);
 const statsOptions = {
   all: false,
   assets: true,
@@ -17,10 +17,12 @@ const statsOptions = {
   performance: true,
   warnings: true,
 };
-const webpackClose = promisify(compiler.close).bind(compiler);
-const webpackRun = promisify(compiler.run).bind(compiler);
 
-async function webpackProdMiddleware(req, res, next) {
+async function webpackBuilderProdMiddleware(req, res, next) {
+
+  const compiler = webpack(config);
+  const webpackClose = promisify(compiler.close).bind(compiler);
+  const webpackRun = promisify(compiler.run).bind(compiler);
 
   try {
     if (!res.app.get('webpackStats')) {
@@ -31,7 +33,7 @@ async function webpackProdMiddleware(req, res, next) {
       await webpackClose();
       const { assets, errors, warnings, entrypoints } = stats.toJson(statsOptions);
 
-      req.app.set('webpackStats', { assets, errors, warnings, entrypoints });
+      req.app.set('webpackStats', { assets, entrypoints, errors, warnings });
     }
 
     next();
@@ -41,21 +43,31 @@ async function webpackProdMiddleware(req, res, next) {
   }
 }
 
-function webpackDevMiddleware() {
+function webpackBuilderDevMiddleware() {
 
-  return [devMiddleware(compiler, {
-    publicPath: config.output.publicPath,
-    serverSideRender: true,
-    stats: 'minimal',
-    writeToDisk: false,
-  }), (req, res, next) => {
+  for (const entry in config.entry) {
 
-    const { assets, errors, warnings, entrypoints } = res.locals.webpack.devMiddleware.stats.toJson(statsOptions);
+    config.entry[entry].unshift('webpack-hot-middleware/client?quiet=true');
+  }
 
-    res.app.set('webpackStats', { assets, errors, warnings, entrypoints });
+  const compiler = webpack(config);
 
-    next();
-  }]
+  return [
+    webpackDevMiddleware(compiler, {
+      publicPath: config.output.publicPath,
+      serverSideRender: true,
+      stats: 'minimal',
+      writeToDisk: false,
+    }), (req, res, next) => {
+
+      const { assets, errors, warnings, entrypoints } = res.locals.webpack.devMiddleware.stats.toJson(statsOptions);
+
+      res.app.set('webpackStats', { assets, entrypoints, errors, warnings });
+
+      next();
+    },
+    webpackHotMiddleware(compiler),
+  ];
 }
 
-module.exports = 'production' !== NODE_ENV ? webpackDevMiddleware() : webpackProdMiddleware;
+module.exports = 'production' !== NODE_ENV ? webpackBuilderDevMiddleware() : webpackBuilderProdMiddleware;
